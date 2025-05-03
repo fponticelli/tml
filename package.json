@@ -9,11 +9,11 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
+    "eslint": "eslint",
     "test": "turbo run test",
     "format:fix": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format": "prettier --check \"**/*.{ts,tsx,md,json}\"",
-    "prepare": "husky",
-    "pre-commit": "lint-staged"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "19.8.0",
@@ -28,7 +28,6 @@
     "eslint": "9.26.0",
     "globals": "16.0.0",
     "husky": "9.1.7",
-    "lint-staged": "15.5.1",
     "prettier": "3.5.3",
     "semantic-release": "24.2.3",
     "turbo": "2.5.2",

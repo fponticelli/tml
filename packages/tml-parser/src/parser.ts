@@ -208,6 +208,7 @@ export function parseTMLValue(input: string): Value {
       return parseValue(trimmed)
     } catch (error) {
       // If parsing fails, fall back to treating it as a string
+      // eslint-disable-next-line no-console
       console.warn(
         'Failed to parse structured value, falling back to string:',
         error

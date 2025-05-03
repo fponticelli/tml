@@ -6,10 +6,10 @@ import {
   BlockNode,
   Attribute,
   BooleanValue,
-  ArrayElement,
-  ObjectField,
   ValueNode,
   Node,
+  ArrayElement,
+  ObjectField,
 } from '../src/types'
 import {
   assertBlockNode,
@@ -29,33 +29,32 @@ import {
   findValueNode,
   countAttributes,
   assertBlockChildCounts,
+  // New helper functions
+  parseTMLAndGetFirstBlock,
+  parseTMLAndAssertBlockCount,
+  findNodesByType,
+  findBlocksByName,
+  parseAndAssertStructure,
+  testMalformedInput,
 } from './helpers'
 
 describe('TML Parser', () => {
   it('should parse an empty document', () => {
-    const result = parseTML('')
+    const result = parseTMLAndAssertBlockCount('', 0)
     expect(result).toEqual([])
   })
 
   it('should parse a simple block', () => {
-    const result = parseTML('html')
-    expect(result.length).toBe(1)
-    assertBlockNode(result[0], 'html', 0)
+    parseTMLAndGetFirstBlock('html', 'html', 0)
   })
 
   it('should parse a block with one attribute', () => {
-    const result = parseTML('html lang=en')
-    expect(result.length).toBe(1)
-
-    const block = assertBlockNode(result[0], 'html', 1)
+    const block = parseTMLAndGetFirstBlock('html lang=en', 'html', 1)
     assertBlockHasAttribute(block, 'lang', 'String', 'en')
   })
 
   it('should parse a block with a value', () => {
-    const result = parseTML('title: My Page')
-    expect(result.length).toBe(1)
-
-    const block = assertBlockNode(result[0], 'title', 1)
+    const block = parseTMLAndGetFirstBlock('title: My Page', 'title', 1)
     assertBlockWithStringValue(block, 'My Page')
   })
 
@@ -66,18 +65,19 @@ describe('TML Parser', () => {
   body
     h1: Hello World`
 
-    const result = parseTML(input)
-    expect(result.length).toBe(1)
+    parseAndAssertStructure(input, result => {
+      expect(result.length).toBe(1)
 
-    const html = assertBlockNode(result[0], 'html', 2)
+      const html = assertBlockNode(result[0], 'html', 2)
 
-    const head = assertChildBlock(html, 'head', 1)
-    const title = assertChildBlock(head, 'title', 1)
-    assertBlockWithStringValue(title, 'My Page')
+      const head = assertChildBlock(html, 'head', 1)
+      const title = assertChildBlock(head, 'title', 1)
+      assertBlockWithStringValue(title, 'My Page')
 
-    const body = assertChildBlock(html, 'body', 1)
-    const h1 = assertChildBlock(body, 'h1', 1)
-    assertBlockWithStringValue(h1, 'Hello World')
+      const body = assertChildBlock(html, 'body', 1)
+      const h1 = assertChildBlock(body, 'h1', 1)
+      assertBlockWithStringValue(h1, 'Hello World')
+    })
   })
 
   it('should parse comments', () => {
@@ -89,35 +89,33 @@ html // Inline comment`
     expect(result.length).toBeGreaterThan(0)
 
     // Check that we have at least one comment node
-    const commentNodes = result.filter((node: Node) => node.type === 'Comment')
+    const commentNodes = findNodesByType<CommentNode>(result, 'Comment')
     expect(commentNodes.length).toBeGreaterThan(0)
 
     // Check that at least one comment has the expected content
     const hasExpectedComment = commentNodes.some(
-      (node: CommentNode) => node.value === 'This is a comment'
+      node => node.value === 'This is a comment'
     )
     expect(hasExpectedComment).toBe(true)
 
     // Find the html block
-    const htmlBlock = result.find(
-      (node: Node) =>
-        node.type === 'Block' && (node as BlockNode).name === 'html'
+    const htmlBlocks = findBlocksByName(result, 'html')
+    expect(htmlBlocks.length).toBe(1)
+
+    const htmlBlock = htmlBlocks[0]
+
+    // Check that the html block has at least one comment
+    const blockComments = findNodesByType<CommentNode>(
+      htmlBlock.children,
+      'Comment'
     )
-    expect(htmlBlock).toBeDefined()
+    expect(blockComments.length).toBeGreaterThan(0)
 
-    if (htmlBlock) {
-      // Check that the html block has at least one comment
-      const blockComments = (htmlBlock as any).children.filter(
-        (child: any) => child.type === 'Comment'
-      )
-      expect(blockComments.length).toBeGreaterThan(0)
-
-      // Check that at least one comment has the expected content
-      const hasInlineComment = blockComments.some(
-        (comment: any) => comment.value === 'Inline comment'
-      )
-      expect(hasInlineComment).toBe(true)
-    }
+    // Check that at least one comment has the expected content
+    const hasInlineComment = blockComments.some(
+      comment => comment.value === 'Inline comment'
+    )
+    expect(hasInlineComment).toBe(true)
   })
 
   it('should parse different value types', () => {
@@ -238,18 +236,19 @@ and should be joined together
   it('should parse multiple attributes', () => {
     const input = `div id=main class=container data-role=button`
 
-    const result = parseTML(input)
-    expect(result.length).toBe(1)
+    parseAndAssertStructure(input, result => {
+      expect(result.length).toBe(1)
 
-    const div = assertBlockNode(result[0], 'div')
-    assertBlockHasAttributes(div, [
-      { key: 'id', valueType: 'String', value: 'main' },
-      { key: 'class', valueType: 'String', value: 'container' },
-      { key: 'data-role', valueType: 'String', value: 'button' },
-    ])
+      const div = assertBlockNode(result[0], 'div')
+      assertBlockHasAttributes(div, [
+        { key: 'id', valueType: 'String', value: 'main' },
+        { key: 'class', valueType: 'String', value: 'container' },
+        { key: 'data-role', valueType: 'String', value: 'button' },
+      ])
 
-    // Verify the exact count
-    expect(countAttributes(div)).toBe(3)
+      // Verify the exact count
+      expect(countAttributes(div)).toBe(3)
+    })
   })
 
   it('should parse multiple attributes nested on multiple lines', () => {
@@ -926,19 +925,15 @@ strings
       const input = `title: "Unbalanced quotes
 content: This should still be parsed`
 
-      // This should not throw an error
-      const result = parseTML(input)
-      expect(result.length).toBeGreaterThan(0)
+      testMalformedInput(input, result => {
+        // Find all block nodes
+        const blocks = findNodesByType<BlockNode>(result, 'Block')
+        expect(blocks.length).toBeGreaterThan(0)
 
-      // Just verify that we have at least one block
-      const blocks = result.filter((node: Node) => node.type === 'Block')
-      expect(blocks.length).toBeGreaterThan(0)
-
-      // Check that we have a title block
-      const titleBlock = blocks.find(
-        (block: BlockNode) => block.name === 'title'
-      )
-      expect(titleBlock).toBeDefined()
+        // Check that we have a title block
+        const titleBlocks = findBlocksByName(result, 'title')
+        expect(titleBlocks.length).toBe(1)
+      })
     })
 
     it('should handle unbalanced braces', () => {
@@ -948,44 +943,38 @@ content: This should still be parsed`
   // Missing closing brace
 next-block: This should be parsed`
 
-      // This should not throw an error
-      const result = parseTML(input)
-      expect(result.length).toBeGreaterThan(0)
+      testMalformedInput(input, result => {
+        // Find all block nodes
+        const blocks = findNodesByType<BlockNode>(result, 'Block')
+        expect(blocks.length).toBeGreaterThan(0)
 
-      // Just verify that we have at least one block
-      const blocks = result.filter((node: Node) => node.type === 'Block')
-      expect(blocks.length).toBeGreaterThan(0)
-
-      // Check that we have a config block
-      const configBlock = blocks.find(
-        (block: BlockNode) => block.name === 'config'
-      )
-      expect(configBlock).toBeDefined()
+        // Check that we have a config block
+        const configBlocks = findBlocksByName(result, 'config')
+        expect(configBlocks.length).toBe(1)
+      })
     })
 
     it('should handle invalid attribute syntax', () => {
       // Use a simpler test case
       const input = `div id=main =invalid class=primary`
 
-      // This should not throw an error
-      const result = parseTML(input)
-      expect(result.length).toBeGreaterThan(0)
+      testMalformedInput(input, result => {
+        // Find all block nodes
+        const blocks = findNodesByType<BlockNode>(result, 'Block')
+        expect(blocks.length).toBeGreaterThan(0)
 
-      // Just verify that we have at least one block
-      const blocks = result.filter((node: Node) => node.type === 'Block')
-      expect(blocks.length).toBeGreaterThan(0)
+        // Check that we have a div block
+        const divBlocks = findBlocksByName(result, 'div')
+        expect(divBlocks.length).toBe(1)
 
-      // Check that we have a div block
-      const divBlock = blocks.find((block: BlockNode) => block.name === 'div')
-      expect(divBlock).toBeDefined()
-
-      if (divBlock) {
         // Check that at least one valid attribute was parsed
-        const attributes = (divBlock as BlockNode).children.filter(
-          child => child.type === 'Attribute'
+        const divBlock = divBlocks[0]
+        const attributes = findNodesByType<Attribute>(
+          divBlock.children,
+          'Attribute'
         )
         expect(attributes.length).toBeGreaterThan(0)
-      }
+      })
     })
 
     it('should handle inconsistent indentation', () => {
@@ -994,28 +983,22 @@ next-block: This should be parsed`
       child2 // This has less indentation than child1
             grandchild // This has more indentation than expected`
 
-      // This should not throw an error
-      const result = parseTML(input)
-      expect(result.length).toBeGreaterThan(0)
+      testMalformedInput(input, result => {
+        // Find the parent block
+        const parentBlocks = findBlocksByName(result, 'parent')
+        expect(parentBlocks.length).toBe(1)
 
-      // Find the parent block
-      const parent = result.find(
-        (node: Node) =>
-          node.type === 'Block' && (node as BlockNode).name === 'parent'
-      ) as BlockNode | undefined
+        const parent = parentBlocks[0]
 
-      expect(parent).toBeDefined()
-
-      if (parent) {
         // Check that at least one child is parsed
-        const hasChild = parent.children.some(
+        const childBlocks = parent.children.filter(
           child =>
             child.type === 'Block' &&
             ((child as BlockNode).name === 'child1' ||
               (child as BlockNode).name === 'child2')
         )
-        expect(hasChild).toBe(true)
-      }
+        expect(childBlocks.length).toBeGreaterThan(0)
+      })
     })
   })
 })

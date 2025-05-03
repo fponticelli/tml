@@ -1,4 +1,5 @@
 import { expect } from 'vitest'
+import { parseTML } from '../src'
 import {
   BlockNode,
   ValueNode,
@@ -333,4 +334,124 @@ export function assertBlockChildCounts(
   if (counts.comments !== undefined) {
     expect(countCommentNodes(block)).toBe(counts.comments)
   }
+}
+
+/**
+ * Helper function to parse TML and return the first block node
+ */
+export function parseTMLAndGetFirstBlock(
+  input: string,
+  expectedName: string,
+  expectedChildrenCount?: number
+): BlockNode {
+  const result = parseTML(input)
+  expect(result.length).toBeGreaterThan(0)
+  return assertBlockNode(result[0], expectedName, expectedChildrenCount)
+}
+
+/**
+ * Helper function to parse TML and assert the number of blocks
+ */
+export function parseTMLAndAssertBlockCount(
+  input: string,
+  expectedCount: number
+): Node[] {
+  const result = parseTML(input)
+  expect(result.length).toBe(expectedCount)
+  return result
+}
+
+/**
+ * Helper function to find all nodes of a specific type in a node tree
+ */
+export function findNodesByType<T extends Node>(
+  nodes: Node[],
+  type: string
+): T[] {
+  return nodes.filter(node => node.type === type) as T[]
+}
+
+/**
+ * Helper function to find all block nodes with a specific name
+ */
+export function findBlocksByName(nodes: Node[], name: string): BlockNode[] {
+  return nodes
+    .filter(node => node.type === 'Block')
+    .filter(node => (node as BlockNode).name === name) as BlockNode[]
+}
+
+/**
+ * Helper function to parse TML and assert a specific structure
+ */
+export function parseAndAssertStructure(
+  input: string,
+  // eslint-disable-next-line no-unused-vars
+  assertions: (nodes: Node[]) => void
+): void {
+  const result = parseTML(input)
+  assertions(result)
+}
+
+/**
+ * Helper function to assert multiple attribute values at once
+ */
+export function assertAttributeValues(
+  attributes: Attribute[],
+  expectedValues: Record<string, any>
+): void {
+  for (const [key, value] of Object.entries(expectedValues)) {
+    const attribute = attributes.find(attr => attr.key === key)
+    expect(attribute).toBeDefined()
+
+    if (typeof value === 'string') {
+      expect(attribute!.value.type).toBe('String')
+      expect((attribute!.value as StringValue).value).toBe(value)
+    } else if (typeof value === 'number') {
+      expect(attribute!.value.type).toBe('Number')
+      expect((attribute!.value as NumberValue).value).toBe(value)
+    } else if (typeof value === 'boolean') {
+      expect(attribute!.value.type).toBe('Boolean')
+      expect((attribute!.value as BooleanValue).value).toBe(value)
+    }
+  }
+}
+
+/**
+ * Helper function to parse TML and test for comments
+ */
+export function parseTMLAndTestComments(
+  input: string,
+  expectedCommentTexts: string[]
+): Node[] {
+  const result = parseTML(input)
+
+  // Find all comment nodes
+  const commentNodes = findNodesByType<CommentNode>(result, 'Comment')
+
+  // Check that we have comments
+  expect(commentNodes.length).toBeGreaterThan(0)
+
+  // Check that the expected comments exist
+  for (const commentText of expectedCommentTexts) {
+    const hasComment = commentNodes.some(node => node.value === commentText)
+    expect(hasComment).toBe(true)
+  }
+
+  return result
+}
+
+/**
+ * Helper function to test malformed input
+ */
+export function testMalformedInput(
+  input: string,
+  // eslint-disable-next-line no-unused-vars
+  assertions: (nodes: Node[]) => void
+): void {
+  // This should not throw an error
+  const result = parseTML(input)
+  expect(result.length).toBeGreaterThan(0)
+
+  // Run the provided assertions
+  assertions(result)
 }
