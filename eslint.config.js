@@ -1,13 +1,13 @@
-const js = require('@eslint/js')
-const globals = require('globals')
-const tseslint = require('typescript-eslint')
+import { configs } from '@eslint/js'
+import { node } from 'globals'
+import { configs as _configs, parser as _parser } from 'typescript-eslint'
 
-module.exports = [
+export default [
   // Base ESLint recommended rules
-  js.configs.recommended,
+  configs.recommended,
 
   // TypeScript parser and recommended rules
-  ...tseslint.configs.recommended,
+  ..._configs.recommended,
 
   // Global ignores
   {
@@ -20,7 +20,7 @@ module.exports = [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        ...globals.node
+        ...node
       }
     },
     rules: {
@@ -33,7 +33,7 @@ module.exports = [
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
-      parser: tseslint.parser,
+      parser: _parser,
       parserOptions: {
         project: './packages/*/tsconfig.json'
       }
