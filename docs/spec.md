@@ -83,8 +83,8 @@ options={ verbose: true, retries: 3, tags: ["a", "b", "c"] }
 
 ### 1.4 Values
 
-- Prefixed with `:`
-- A `ValueNode` is a literal value (boolean, number, string, object, or array). It shares the same type system and parsing rules as attribute values.
+- A `ValueNode` begins with a `:` token. Although this may look like a prefix on a block or attribute, it is not — the colon introduces a value node independently of any previous tokens on the line.
+- Value nodes are literal values (boolean, number, string, object, or array). They share the same type system and parsing rules as attribute values.
 
 ```tml
 : true
@@ -118,7 +118,7 @@ html
     div: Welcome!
 ```
 
-- Inline values begin with `key:`, followed by the value content on the same line.
+- A value node may appear on the same line as a block or after its attributes, starting with a `:`. For example: `class="main": Welcome` is valid and associates the string value `Welcome` with the block `class="main"`. In such cases, quotes are required to ensure the colon is not interpreted as part of an attribute value.
 - If the value is a structured type (e.g. an object, array, or quoted string), it may span multiple lines, as long as indentation and braces/brackets are balanced.
 
 ```tml
