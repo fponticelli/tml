@@ -1,4 +1,4 @@
-import { BlockNode, Node } from '@/types'
+import { Node } from '@/types'
 import { createLinePosition } from './position'
 import { parseAttribute, parseBlockComment, parseLineComment, parseValueNode } from './node-parsers'
 import { tokenizeLine } from './tokenizer'
