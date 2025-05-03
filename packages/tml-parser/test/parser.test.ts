@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseTML, parseTMLValue } from '../src/parser'
+import { parseTML, parseTMLValue } from '../src'
 import { StringValue, CommentNode } from '../src/types'
 import {
   assertBlockNode,

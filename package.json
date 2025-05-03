@@ -10,8 +10,8 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "test": "turbo run test",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\""
+    "format:fix": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format": "prettier --check \"**/*.{ts,tsx,md,json}\""
   },
   "devDependencies": {
     "@eslint/js": "9.26.0",
