@@ -57,6 +57,21 @@ section id=about class=main
   - **Objects**: JSON-like syntax (e.g. `{ key: "value" }`)
   - **Arrays**: Square-bracketed values, optionally nested (e.g. `[1, true, "text"]`)
 
+- Structured values (objects, arrays, quoted strings) may begin inline but span multiple lines, as long as braces/brackets are balanced and indentation is consistent.
+
+```tml
+config={
+  server: "api.example.com",
+  retries: 3,
+  features: [
+    "fast-start",
+    "auto-retry"
+  ]
+}
+```
+
+This is parsed as a single attribute with a multiline object value.
+
 - Quoted values are always parsed as strings. Unquoted values are interpreted as boolean, number, or plain string depending on content.
 - Boolean shortcut syntax: `key!` is equivalent to `key=true`
 - Attribute **order is preserved**
