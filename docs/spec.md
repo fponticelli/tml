@@ -6,16 +6,16 @@ TML is a concise, human-readable markup language for representing hierarchical d
 
 ### 1.1 Indentation
 
-* TML uses **indentation** (spaces or tabs) to indicate hierarchy.
-* Nesting is based on line indentation relative to its parent.
-* Mixed tabs and spaces are discouraged.
+- TML uses **indentation** (spaces or tabs) to indicate hierarchy.
+- Nesting is based on line indentation relative to its parent.
+- Mixed tabs and spaces are discouraged.
 
 ### 1.2 Blocks
 
-* A `BlockNode` starts with a name and optionally attributes and inline children.
-* Format: `name attr1=value1 attr2=value2 child1 child2`
-* Attributes come first; first non-attribute token begins the child list.
-* Block names may begin with `$` to support constructs like `$ref`, `$include`, etc.
+- A `BlockNode` starts with a name and optionally attributes and inline children.
+- Format: `name attr1=value1 attr2=value2 child1 child2`
+- Attributes come first; first non-attribute token begins the child list.
+- Block names may begin with `$` to support constructs like `$ref`, `$include`, etc.
 
 ```tml
 html lang=en
@@ -26,25 +26,25 @@ html lang=en
 
 ### 1.3 Attributes
 
-* Format: `key=value`
-* Types are inferred:
+- Format: `key=value`
+- Types are inferred:
 
-  * Unquoted: `true`, `false`, numbers → parsed as boolean/number
-  * Quoted: `'string'` or `"string"` → always a string
-  * Object/array: Use JSON-like inline syntax: `{ key: [1, true] }`
+  - Unquoted: `true`, `false`, numbers → parsed as boolean/number
+  - Quoted: `'string'` or `"string"` → always a string
+  - Object/array: Use JSON-like inline syntax: `{ key: [1, true] }`
 
 ```tml
 config={ key1: "value1", key2: ["valueA", "valueB"] }
 ```
 
-* Boolean shortcut: `checked!` → `checked=true`
-* Attribute **order is preserved**
-* **Multiple attributes with the same name are allowed** and are retained in the order they appear — no assumption is made that the last one wins
+- Boolean shortcut: `checked!` → `checked=true`
+- Attribute **order is preserved**
+- **Multiple attributes with the same name are allowed** and are retained in the order they appear — no assumption is made that the last one wins
 
 ### 1.4 Values
 
-* Prefixed with `:`
-* A `ValueNode` is an anonymous literal, and can appear inline or nested:
+- Prefixed with `:`
+- A `ValueNode` is an anonymous literal, and can appear inline or nested:
 
 ```tml
 : true
@@ -52,8 +52,8 @@ config={ key1: "value1", key2: ["valueA", "valueB"] }
 : { key: [1, true] }
 ```
 
-* If a colon is used, **everything after the colon on that line is treated as a single value**.
-* This means that additional tokens after a colon will not be parsed as child nodes.
+- If a colon is used, **everything after the colon on that line is treated as a single value**.
+- This means that additional tokens after a colon will not be parsed as child nodes.
 
 ```tml
 // Valid:
@@ -78,8 +78,8 @@ html
     div: Welcome!
 ```
 
-* Single-line: `key: value`
-* Multi-line:
+- Single-line: `key: value`
+- Multi-line:
 
 ```tml
 description:
@@ -89,20 +89,20 @@ description:
 
 ### 1.5 Comments
 
-* Line comment: `//` prefix
-* Inline comment: `/* comment */` inside attributes or children
-* `CommentNode`s may be preserved for tooling but ignored semantically
+- Line comment: `//` prefix
+- Inline comment: `/* comment */` inside attributes or children
+- `CommentNode`s may be preserved for tooling but ignored semantically
 
 ### 1.6 Inline Nesting
 
-* Blocks can have inline children on the same line:
+- Blocks can have inline children on the same line:
 
 ```tml
 html head title: Hello
   body div: Welcome!
 ```
 
-* Parsed as nested children:
+- Parsed as nested children:
 
 ```tml
 html
@@ -112,7 +112,7 @@ html
     div: Welcome!
 ```
 
-* Indentation after an inline line applies to the **last full block** — not inline children
+- Indentation after an inline line applies to the **last full block** — not inline children
 
 ```tml
 html head title: Hello
@@ -123,11 +123,11 @@ html head title: Hello
 
 ## 2. Parsing Behavior
 
-* TML is parsed with a **best-effort strategy**:
+- TML is parsed with a **best-effort strategy**:
 
-  * Recover from errors where possible
-  * Invalid input may emit warnings, not crashes
-  * Partially valid documents produce partial ASTs
+  - Recover from errors where possible
+  - Invalid input may emit warnings, not crashes
+  - Partially valid documents produce partial ASTs
 
 ## 3. Example
 
