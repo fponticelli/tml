@@ -13,7 +13,7 @@ import {
   PositionedObjectValue,
   StringValue,
   Value,
-  ValueNode
+  ValueNode,
 } from '@/types'
 
 /**
@@ -26,17 +26,26 @@ function createPoint(line: number, column: number): Point {
 /**
  * Creates a Position object representing a span in the source.
  */
-function createPosition(startLine: number, startColumn: number, endLine: number, endColumn: number): Position {
+function createPosition(
+  startLine: number,
+  startColumn: number,
+  endLine: number,
+  endColumn: number
+): Position {
   return {
     start: createPoint(startLine, startColumn),
-    end: createPoint(endLine, endColumn)
+    end: createPoint(endLine, endColumn),
   }
 }
 
 /**
  * Creates a Position object for a single line span.
  */
-function createLinePosition(line: number, startColumn: number, endColumn: number): Position {
+function createLinePosition(
+  line: number,
+  startColumn: number,
+  endColumn: number
+): Position {
   return createPosition(line, startColumn, line, endColumn)
 }
 
@@ -47,11 +56,14 @@ function parseStringValue(value: string, position?: Position): StringValue {
   let parsed = value.trim()
 
   // Handle quoted strings
-  if ((parsed.startsWith('"') && parsed.endsWith('"')) ||
-      (parsed.startsWith("'") && parsed.endsWith("'"))) {
+  if (
+    (parsed.startsWith('"') && parsed.endsWith('"')) ||
+    (parsed.startsWith("'") && parsed.endsWith("'"))
+  ) {
     // Remove quotes and handle escapes
     const quote = parsed[0]
-    parsed = parsed.slice(1, -1)
+    parsed = parsed
+      .slice(1, -1)
       .replace(/\\n/g, '\n')
       .replace(/\\t/g, '\t')
       .replace(/\\r/g, '\r')
@@ -62,7 +74,7 @@ function parseStringValue(value: string, position?: Position): StringValue {
   return {
     type: 'String',
     value: parsed,
-    position
+    position,
   }
 }
 
@@ -73,7 +85,7 @@ function parseNumberValue(value: string, position?: Position): NumberValue {
   return {
     type: 'Number',
     value: Number(value.trim()),
-    position
+    position,
   }
 }
 
@@ -84,7 +96,7 @@ function parseBooleanValue(value: string, position?: Position): BooleanValue {
   return {
     type: 'Boolean',
     value: value.trim().toLowerCase() === 'true',
-    position
+    position,
   }
 }
 
@@ -121,7 +133,10 @@ function parseValue(value: string, position?: Position): Value {
 /**
  * Parses an object value.
  */
-function parseObjectValue(value: string, position?: Position): PositionedObjectValue {
+function parseObjectValue(
+  value: string,
+  position?: Position
+): PositionedObjectValue {
   const fields: Array<ObjectField | CommentNode> = []
   let content = value.trim().slice(1, -1).trim()
 
@@ -157,7 +172,7 @@ function parseObjectValue(value: string, position?: Position): PositionedObjectV
     let collectingKey = true
 
     for (let i = 0; i <= content.length; i++) {
-      const char = i < content.length ? content[i] : ','  // Add a comma at the end to process the last field
+      const char = i < content.length ? content[i] : ',' // Add a comma at the end to process the last field
       const prevChar = i > 0 ? content[i - 1] : ''
 
       // Handle quotes
@@ -184,7 +199,13 @@ function parseObjectValue(value: string, position?: Position): PositionedObjectV
       }
 
       // Handle field separator
-      if (char === ':' && inQuote === null && inObject === 0 && inArray === 0 && collectingKey) {
+      if (
+        char === ':' &&
+        inQuote === null &&
+        inObject === 0 &&
+        inArray === 0 &&
+        collectingKey
+      ) {
         currentKey = currentKey.trim()
         collectingKey = false
         continue
@@ -198,7 +219,7 @@ function parseObjectValue(value: string, position?: Position): PositionedObjectV
             type: 'Field',
             key: currentKey,
             value: parseValue(currentValue, position),
-            position
+            position,
           })
         }
         currentKey = ''
@@ -219,14 +240,17 @@ function parseObjectValue(value: string, position?: Position): PositionedObjectV
   return {
     type: 'Object',
     fields,
-    position
+    position,
   }
 }
 
 /**
  * Parses an array value.
  */
-function parseArrayValue(value: string, position?: Position): PositionedArrayValue {
+function parseArrayValue(
+  value: string,
+  position?: Position
+): PositionedArrayValue {
   const elements: Array<ArrayElement | CommentNode> = []
   let content = value.trim().slice(1, -1).trim()
 
@@ -260,7 +284,7 @@ function parseArrayValue(value: string, position?: Position): PositionedArrayVal
     let inArray = 0
 
     for (let i = 0; i <= content.length; i++) {
-      const char = i < content.length ? content[i] : ','  // Add a comma at the end to process the last element
+      const char = i < content.length ? content[i] : ',' // Add a comma at the end to process the last element
       const prevChar = i > 0 ? content[i - 1] : ''
 
       // Handle quotes
@@ -292,7 +316,7 @@ function parseArrayValue(value: string, position?: Position): PositionedArrayVal
           elements.push({
             type: 'Element',
             value: parseValue(currentValue.trim(), position),
-            position
+            position,
           })
         }
         currentValue = ''
@@ -307,20 +331,28 @@ function parseArrayValue(value: string, position?: Position): PositionedArrayVal
   return {
     type: 'Array',
     elements,
-    position
+    position,
   }
 }
 
 /**
  * Parses an attribute (key=value).
  */
-function parseAttribute(text: string, line: number, startColumn: number): Attribute {
+function parseAttribute(
+  text: string,
+  line: number,
+  startColumn: number
+): Attribute {
   const equalsIndex = text.indexOf('=')
 
   // Handle boolean shortcut (key!)
   if (equalsIndex === -1 && text.endsWith('!')) {
     const key = text.slice(0, -1)
-    const position = createLinePosition(line, startColumn, startColumn + text.length)
+    const position = createLinePosition(
+      line,
+      startColumn,
+      startColumn + text.length
+    )
 
     return {
       type: 'Attribute',
@@ -328,9 +360,9 @@ function parseAttribute(text: string, line: number, startColumn: number): Attrib
       value: {
         type: 'Boolean',
         value: true,
-        position
+        position,
       },
-      position
+      position,
     }
   }
 
@@ -338,13 +370,17 @@ function parseAttribute(text: string, line: number, startColumn: number): Attrib
   if (equalsIndex > 0) {
     const key = text.slice(0, equalsIndex).trim()
     const valueText = text.slice(equalsIndex + 1).trim()
-    const position = createLinePosition(line, startColumn, startColumn + text.length)
+    const position = createLinePosition(
+      line,
+      startColumn,
+      startColumn + text.length
+    )
 
     return {
       type: 'Attribute',
       key,
       value: parseValue(valueText, position),
-      position
+      position,
     }
   }
 
@@ -355,30 +391,42 @@ function parseAttribute(text: string, line: number, startColumn: number): Attrib
     value: {
       type: 'Boolean',
       value: true,
-      position: createLinePosition(line, startColumn, startColumn + text.length)
+      position: createLinePosition(
+        line,
+        startColumn,
+        startColumn + text.length
+      ),
     },
-    position: createLinePosition(line, startColumn, startColumn + text.length)
+    position: createLinePosition(line, startColumn, startColumn + text.length),
   }
 }
 
 /**
  * Parses a line comment.
  */
-function parseLineComment(text: string, line: number, startColumn: number): CommentNode {
+function parseLineComment(
+  text: string,
+  line: number,
+  startColumn: number
+): CommentNode {
   const commentText = text.startsWith('//') ? text.slice(2).trim() : text
 
   return {
     type: 'Comment',
     value: commentText,
     isLineComment: true,
-    position: createLinePosition(line, startColumn, startColumn + text.length)
+    position: createLinePosition(line, startColumn, startColumn + text.length),
   }
 }
 
 /**
  * Parses a block comment.
  */
-function parseBlockComment(text: string, line: number, startColumn: number): CommentNode {
+function parseBlockComment(
+  text: string,
+  line: number,
+  startColumn: number
+): CommentNode {
   // Remove /* and */ from the comment
   const commentText = text.slice(2, -2).trim()
 
@@ -386,21 +434,29 @@ function parseBlockComment(text: string, line: number, startColumn: number): Com
     type: 'Comment',
     value: commentText,
     isLineComment: false,
-    position: createLinePosition(line, startColumn, startColumn + text.length)
+    position: createLinePosition(line, startColumn, startColumn + text.length),
   }
 }
 
 /**
  * Parses a value node (prefixed with ":").
  */
-function parseValueNode(text: string, line: number, startColumn: number): ValueNode {
+function parseValueNode(
+  text: string,
+  line: number,
+  startColumn: number
+): ValueNode {
   const valueText = text.startsWith(':') ? text.slice(1).trim() : text
-  const position = createLinePosition(line, startColumn, startColumn + text.length)
+  const position = createLinePosition(
+    line,
+    startColumn,
+    startColumn + text.length
+  )
 
   return {
     type: 'Value',
     value: parseValue(valueText, position),
-    position
+    position,
   }
 }
 
@@ -508,7 +564,10 @@ function tokenizeLine(line: string): string[] {
 /**
  * Parses a line of TML into a node.
  */
-function parseLine(line: string, lineNumber: number): { indent: number; node: Node | null } {
+function parseLine(
+  line: string,
+  lineNumber: number
+): { indent: number; node: Node | null } {
   // Skip empty lines
   if (!line.trim()) {
     return { indent: 0, node: null }
@@ -526,7 +585,7 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
   if (trimmedLine.startsWith('//')) {
     return {
       indent,
-      node: parseLineComment(trimmedLine, lineNumber, indent)
+      node: parseLineComment(trimmedLine, lineNumber, indent),
     }
   }
 
@@ -534,7 +593,7 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
   if (trimmedLine.startsWith('/*') && trimmedLine.endsWith('*/')) {
     return {
       indent,
-      node: parseBlockComment(trimmedLine, lineNumber, indent)
+      node: parseBlockComment(trimmedLine, lineNumber, indent),
     }
   }
 
@@ -542,16 +601,19 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
   if (trimmedLine.startsWith(':')) {
     return {
       indent,
-      node: parseValueNode(trimmedLine, lineNumber, indent)
+      node: parseValueNode(trimmedLine, lineNumber, indent),
     }
   }
 
   // Handle attributes (key=value or key!) on their own line
-  if ((trimmedLine.includes('=') || trimmedLine.endsWith('!')) &&
-      !trimmedLine.includes(' ') && !trimmedLine.includes(':')) {
+  if (
+    (trimmedLine.includes('=') || trimmedLine.endsWith('!')) &&
+    !trimmedLine.includes(' ') &&
+    !trimmedLine.includes(':')
+  ) {
     return {
       indent,
-      node: parseAttribute(trimmedLine, lineNumber, indent)
+      node: parseAttribute(trimmedLine, lineNumber, indent),
     }
   }
 
@@ -563,7 +625,11 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
 
     // If there's content after the colon, parse it as a value
     if (valueText.length > 1 && valueText.trim().length > 1) {
-      const valueNode = parseValueNode(valueText, lineNumber, indent + colonIndex)
+      const valueNode = parseValueNode(
+        valueText,
+        lineNumber,
+        indent + colonIndex
+      )
 
       return {
         indent,
@@ -571,8 +637,12 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
           type: 'Block',
           name: blockName,
           children: [valueNode],
-          position: createLinePosition(lineNumber, indent, indent + trimmedLine.length)
-        }
+          position: createLinePosition(
+            lineNumber,
+            indent,
+            indent + trimmedLine.length
+          ),
+        },
       }
     } else {
       // If there's only a colon (or colon + whitespace), return just the block
@@ -583,8 +653,12 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
           type: 'Block',
           name: blockName,
           children: [],
-          position: createLinePosition(lineNumber, indent, indent + trimmedLine.length)
-        }
+          position: createLinePosition(
+            lineNumber,
+            indent,
+            indent + trimmedLine.length
+          ),
+        },
       }
     }
   }
@@ -648,13 +722,15 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
           }
 
           // Check for block pattern (no special characters, not in quotes)
-          if (!currentToken.includes(':') &&
-              !currentToken.includes('=') &&
-              !currentToken.includes('!') &&
-              !currentToken.startsWith('"') &&
-              !currentToken.startsWith("'") &&
-              !currentToken.startsWith('{') &&
-              !currentToken.startsWith('[')) {
+          if (
+            !currentToken.includes(':') &&
+            !currentToken.includes('=') &&
+            !currentToken.includes('!') &&
+            !currentToken.startsWith('"') &&
+            !currentToken.startsWith("'") &&
+            !currentToken.startsWith('{') &&
+            !currentToken.startsWith('[')
+          ) {
             valueEndIndex = j - 1
             break
           }
@@ -714,7 +790,11 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
       type: 'Block',
       name: token,
       children: [],
-      position: createLinePosition(lineNumber, currentColumn, currentColumn + token.length)
+      position: createLinePosition(
+        lineNumber,
+        currentColumn,
+        currentColumn + token.length
+      ),
     })
 
     currentColumn += token.length + 1
@@ -727,8 +807,12 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
       type: 'Block',
       name: blockName,
       children,
-      position: createLinePosition(lineNumber, indent, indent + trimmedLine.length)
-    }
+      position: createLinePosition(
+        lineNumber,
+        indent,
+        indent + trimmedLine.length
+      ),
+    },
   }
 }
 
@@ -746,14 +830,19 @@ export function parseTML(input: string): Node[] {
 
   // Check if this is a multiline object or array
   const trimmed = normalizedInput.trim()
-  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
-      (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+  if (
+    (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+    (trimmed.startsWith('[') && trimmed.endsWith(']'))
+  ) {
     // If it's a standalone object/array, return it as a value node
     if (!trimmed.includes('\n')) {
       const valueNode: ValueNode = {
         type: 'Value',
         value: parseValue(trimmed),
-        position: { start: { line: 1, column: 0 }, end: { line: 1, column: trimmed.length } }
+        position: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: trimmed.length },
+        },
       }
       return [valueNode]
     }
@@ -764,7 +853,11 @@ export function parseTML(input: string): Node[] {
   const stack: { indent: number; node: BlockNode }[] = []
 
   // Track multiline value collection
-  let collectingValue: { blockNode: BlockNode, startIndent: number, lines: string[] } | null = null
+  let collectingValue: {
+    blockNode: BlockNode
+    startIndent: number
+    lines: string[]
+  } | null = null
 
   // Process each line
   for (let i = 0; i < lines.length; i++) {
@@ -790,10 +883,12 @@ export function parseTML(input: string): Node[] {
         const valueNode: ValueNode = {
           type: 'Value',
           value: parseTMLValue(valueText),
-          position: createPosition(lineNumber - collectingValue.lines.length,
-                                  collectingValue.startIndent,
-                                  lineNumber - 1,
-                                  collectingValue.lines[collectingValue.lines.length - 1].length)
+          position: createPosition(
+            lineNumber - collectingValue.lines.length,
+            collectingValue.startIndent,
+            lineNumber - 1,
+            collectingValue.lines[collectingValue.lines.length - 1].length
+          ),
         }
 
         collectingValue.blockNode.children.push(valueNode)
@@ -812,11 +907,14 @@ export function parseTML(input: string): Node[] {
         collectingValue = {
           blockNode: node,
           startIndent: blockIndent,
-          lines: []
+          lines: [],
         }
 
         // Handle indentation to build the hierarchy
-        while (stack.length > 0 && blockIndent <= stack[stack.length - 1].indent) {
+        while (
+          stack.length > 0 &&
+          blockIndent <= stack[stack.length - 1].indent
+        ) {
           stack.pop()
         }
 
@@ -868,10 +966,12 @@ export function parseTML(input: string): Node[] {
     const valueNode: ValueNode = {
       type: 'Value',
       value: parseTMLValue(valueText),
-      position: createPosition(lines.length - collectingValue.lines.length + 1,
-                              collectingValue.startIndent,
-                              lines.length,
-                              collectingValue.lines[collectingValue.lines.length - 1].length)
+      position: createPosition(
+        lines.length - collectingValue.lines.length + 1,
+        collectingValue.startIndent,
+        lines.length,
+        collectingValue.lines[collectingValue.lines.length - 1].length
+      ),
     }
 
     collectingValue.blockNode.children.push(valueNode)
@@ -886,8 +986,10 @@ export function parseTML(input: string): Node[] {
 export function parseTMLValue(input: string): Value {
   // Check if this is a multiline object or array
   const trimmed = input.trim()
-  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
-      (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+  if (
+    (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+    (trimmed.startsWith('[') && trimmed.endsWith(']'))
+  ) {
     return parseValue(trimmed)
   }
 
@@ -899,17 +1001,17 @@ export function parseTMLValue(input: string): Value {
     const nonEmptyLines = lines.filter(line => line.trim().length > 0)
 
     if (nonEmptyLines.length > 0) {
-      const indentations = nonEmptyLines
-        .map(line => line.match(/^(\s*)/)?.[1].length || 0)
+      const indentations = nonEmptyLines.map(
+        line => line.match(/^(\s*)/)?.[1].length || 0
+      )
 
       const minIndent = Math.min(...indentations)
 
       // Remove the common indentation from each line
-      const processedLines = lines
-        .map(line => {
-          if (line.trim().length === 0) return ''
-          return line.substring(Math.min(minIndent, line.length))
-        })
+      const processedLines = lines.map(line => {
+        if (line.trim().length === 0) return ''
+        return line.substring(Math.min(minIndent, line.length))
+      })
 
       // Join with spaces as per the spec
       const processed = processedLines
@@ -919,13 +1021,15 @@ export function parseTMLValue(input: string): Value {
 
       return {
         type: 'String',
-        value: processed
+        value: processed,
       }
     }
   }
 
   // Standard behavior - join with spaces
-  const trimmedLines = lines.map(line => line.trim()).filter(line => line.length > 0)
+  const trimmedLines = lines
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
   const joined = trimmedLines.join(' ')
 
   return parseValue(joined)

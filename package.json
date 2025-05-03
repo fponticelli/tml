@@ -2,6 +2,7 @@
   "name": "tml-monorepo",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.10.0",
   "scripts": {
     "build": "turbo run build",

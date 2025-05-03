@@ -1,6 +1,10 @@
-import { configs } from '@eslint/js'
-import { node } from 'globals'
-import { configs as _configs, parser as _parser } from 'typescript-eslint'
+import js from '@eslint/js'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+
+const { configs } = js
+const { node } = globals
+const { configs: _configs, parser: _parser } = tseslint
 
 export default [
   // Base ESLint recommended rules
@@ -29,9 +33,9 @@ export default [
     }
   },
 
-  // TypeScript files configuration
+  // TypeScript source files configuration
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/src/**/*.ts', '**/src/**/*.tsx'],
     languageOptions: {
       parser: _parser,
       parserOptions: {
@@ -40,6 +44,26 @@ export default [
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }]
+    }
+  },
+
+  // TypeScript test files configuration
+  {
+    files: ['**/test/**/*.ts', '**/test/**/*.tsx'],
+    languageOptions: {
+      parser: _parser,
+      parserOptions: {
+        project: './packages/*/tsconfig.test.json'
+      }
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', {

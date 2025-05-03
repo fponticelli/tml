@@ -143,7 +143,10 @@ export type PositionedObjectValue = {
 /**
  * Value type for all supported TML values: primitive, object, or array.
  */
-export type Value = PrimitiveValue | PositionedObjectValue | PositionedArrayValue
+export type Value =
+  | PrimitiveValue
+  | PositionedObjectValue
+  | PositionedArrayValue
 
 /**
  * Represents a standalone literal value (anonymous), prefixed by ":".

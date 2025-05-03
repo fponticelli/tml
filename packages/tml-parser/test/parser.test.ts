@@ -4,7 +4,6 @@ import { StringValue, CommentNode } from '../src/types'
 import {
   assertBlockNode,
   assertValueNode,
-  assertCommentNode,
   getStringValue,
   findChildBlockByName,
   assertChildBlock,
@@ -19,7 +18,7 @@ import {
   assertArrayHasElement,
   findValueNode,
   countAttributes,
-  assertBlockChildCounts
+  assertBlockChildCounts,
 } from './helpers'
 
 describe('TML Parser', () => {
@@ -90,8 +89,8 @@ html // Inline comment`
     expect(hasExpectedComment).toBe(true)
 
     // Find the html block
-    const htmlBlock = result.find(node =>
-      node.type === 'Block' && (node as any).name === 'html'
+    const htmlBlock = result.find(
+      node => node.type === 'Block' && (node as any).name === 'html'
     )
     expect(htmlBlock).toBeDefined()
 
@@ -201,9 +200,7 @@ values
     expect(blockNodes.length).toBeGreaterThan(0)
 
     // Check that at least one block has the name "html"
-    const hasHtmlBlock = blockNodes.some(
-      node => (node as any).name === 'html'
-    )
+    const hasHtmlBlock = blockNodes.some(node => (node as any).name === 'html')
     expect(hasHtmlBlock).toBe(true)
   })
 
@@ -216,7 +213,9 @@ and should be joined together
 
     const result = parseTMLValue(input)
     expect(result.type).toBe('String')
-    expect((result as StringValue).value).toBe('This is a multiline value that spans several lines and should be joined together')
+    expect((result as StringValue).value).toBe(
+      'This is a multiline value that spans several lines and should be joined together'
+    )
   })
 
   // New tests for the requested scenarios
@@ -231,7 +230,7 @@ and should be joined together
     assertBlockHasAttributes(div, [
       { key: 'id', valueType: 'String', value: 'main' },
       { key: 'class', valueType: 'String', value: 'container' },
-      { key: 'data-role', valueType: 'String', value: 'button' }
+      { key: 'data-role', valueType: 'String', value: 'button' },
     ])
 
     // Verify the exact count
@@ -248,28 +247,28 @@ and should be joined together
     expect(result.length).toBeGreaterThan(0)
 
     // Find the form block
-    const form = result.find(node =>
-      node.type === 'Block' && (node as any).name === 'form'
+    const form = result.find(
+      node => node.type === 'Block' && (node as any).name === 'form'
     ) as any
 
     expect(form).toBeDefined()
 
     if (form) {
       // Find the input element
-      const input = form.children.find((child: any) =>
-        child.type === 'Block' && child.name === 'input'
+      const input = form.children.find(
+        (child: any) => child.type === 'Block' && child.name === 'input'
       )
 
       expect(input).toBeDefined()
 
       if (input) {
         // Check that input has type and id attributes
-        const typeAttr = input.children.find((child: any) =>
-          child.type === 'Attribute' && child.key === 'type'
+        const typeAttr = input.children.find(
+          (child: any) => child.type === 'Attribute' && child.key === 'type'
         )
 
-        const idAttr = input.children.find((child: any) =>
-          child.type === 'Attribute' && child.key === 'id'
+        const idAttr = input.children.find(
+          (child: any) => child.type === 'Attribute' && child.key === 'id'
         )
 
         expect(typeAttr).toBeDefined()
@@ -287,20 +286,20 @@ and should be joined together
       }
 
       // Find the button element
-      const button = form.children.find((child: any) =>
-        child.type === 'Block' && child.name === 'button'
+      const button = form.children.find(
+        (child: any) => child.type === 'Block' && child.name === 'button'
       )
 
       expect(button).toBeDefined()
 
       if (button) {
         // Check that button has type and disabled attributes
-        const typeAttr = button.children.find((child: any) =>
-          child.type === 'Attribute' && child.key === 'type'
+        const typeAttr = button.children.find(
+          (child: any) => child.type === 'Attribute' && child.key === 'type'
         )
 
-        const disabledAttr = button.children.find((child: any) =>
-          child.type === 'Attribute' && child.key === 'disabled'
+        const disabledAttr = button.children.find(
+          (child: any) => child.type === 'Attribute' && child.key === 'disabled'
         )
 
         expect(typeAttr).toBeDefined()
@@ -328,20 +327,20 @@ and should be joined together
     expect(result.length).toBeGreaterThan(0)
 
     // Find the div block
-    const div = result.find(node =>
-      node.type === 'Block' && (node as any).name === 'div'
+    const div = result.find(
+      node => node.type === 'Block' && (node as any).name === 'div'
     ) as any
 
     expect(div).toBeDefined()
 
     if (div) {
       // Check attributes
-      const idAttr = div.children.find((child: any) =>
-        child.type === 'Attribute' && child.key === 'id'
+      const idAttr = div.children.find(
+        (child: any) => child.type === 'Attribute' && child.key === 'id'
       )
 
-      const classAttr = div.children.find((child: any) =>
-        child.type === 'Attribute' && child.key === 'class'
+      const classAttr = div.children.find(
+        (child: any) => child.type === 'Attribute' && child.key === 'class'
       )
 
       expect(idAttr).toBeDefined()
@@ -358,7 +357,9 @@ and should be joined together
       }
 
       // Check for a value node
-      const valueNode = div.children.find((child: any) => child.type === 'Value')
+      const valueNode = div.children.find(
+        (child: any) => child.type === 'Value'
+      )
       expect(valueNode).toBeDefined()
 
       if (valueNode) {
@@ -380,7 +381,7 @@ and should be joined together
     // Check attributes
     assertBlockHasAttributes(div, [
       { key: 'id', valueType: 'String', value: 'container' },
-      { key: 'class', valueType: 'String', value: 'wrapper' }
+      { key: 'class', valueType: 'String', value: 'wrapper' },
     ])
 
     // Check span block
@@ -446,8 +447,8 @@ and should be joined together
     expect(result.length).toBeGreaterThan(0)
 
     // Find the config block
-    const config = result.find(node =>
-      node.type === 'Block' && (node as any).name === 'config'
+    const config = result.find(
+      node => node.type === 'Block' && (node as any).name === 'config'
     ) as any
 
     expect(config).toBeDefined()
@@ -490,8 +491,8 @@ and should be joined together
     expect(result.length).toBeGreaterThan(0)
 
     // Find the items block
-    const items = result.find(node =>
-      node.type === 'Block' && (node as any).name === 'items'
+    const items = result.find(
+      node => node.type === 'Block' && (node as any).name === 'items'
     ) as any
 
     expect(items).toBeDefined()
@@ -505,22 +506,28 @@ and should be joined together
         if (child.type === 'Value') {
           // It could be parsed as a string containing the array notation
           if (child.value.type === 'String') {
-            return child.value.value.includes('Item 1') &&
-                   child.value.value.includes('Item 2')
+            return (
+              child.value.value.includes('Item 1') &&
+              child.value.value.includes('Item 2')
+            )
           }
 
           // Or it could be parsed as an actual array
           if (child.value.type === 'Array') {
             // Check if the array has elements with the expected values
-            return child.value.elements.some((el: any) =>
-              el.type === 'Element' &&
-              el.value.type === 'String' &&
-              el.value.value === 'Item 1'
-            ) &&
-            child.value.elements.some((el: any) =>
-              el.type === 'Element' &&
-              el.value.type === 'String' &&
-              el.value.value === 'Item 2'
+            return (
+              child.value.elements.some(
+                (el: any) =>
+                  el.type === 'Element' &&
+                  el.value.type === 'String' &&
+                  el.value.value === 'Item 1'
+              ) &&
+              child.value.elements.some(
+                (el: any) =>
+                  el.type === 'Element' &&
+                  el.value.type === 'String' &&
+                  el.value.value === 'Item 2'
+              )
             )
           }
         }
@@ -574,15 +581,17 @@ strings
     expect(result.length).toBeGreaterThan(0)
 
     // Find the description block
-    const description = result.find(node =>
-      node.type === 'Block' && (node as any).name === 'description'
+    const description = result.find(
+      node => node.type === 'Block' && (node as any).name === 'description'
     ) as any
 
     expect(description).toBeDefined()
 
     if (description) {
       // Check that the description block has a value node
-      const valueNode = description.children.find((child: any) => child.type === 'Value')
+      const valueNode = description.children.find(
+        (child: any) => child.type === 'Value'
+      )
       expect(valueNode).toBeDefined()
 
       if (valueNode) {

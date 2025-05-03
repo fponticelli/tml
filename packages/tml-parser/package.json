@@ -19,8 +19,8 @@
     "build": "tsc && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src --ext ts",
-    "lint:fix": "eslint src --ext ts --fix"
+    "lint": "eslint src test --ext ts",
+    "lint:fix": "eslint src test --ext ts --fix"
   },
   "devDependencies": {
     "@types/node": "22.15.3",
