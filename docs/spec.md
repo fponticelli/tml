@@ -178,28 +178,31 @@ html head title: Hello
 
 ### 1.7 Inline Contents
 
-- Blocks can also define **inline children** on the same line, after attributes.
-- This allows for compact expressions of shallow hierarchies.
-
-#### Example
+Blocks can define **inline children** on the same line, as long as a value node (`:`) does not appear. Once a colon is used, the remainder of the line is treated as a single value and cannot include additional blocks.
 
 ```tml
-html head title: Hello body div: Welcome!
-```
+// Valid: nested inline blocks with no value node
+html head title body div
 
-This is equivalent to:
-
-```tml
+// Equivalent to:
 html
   head
-    title: Hello
-  body
-    div: Welcome!
+    title
+      body
+        div
 ```
 
-- Inline children are parsed as nested block nodes in order.
-- Attributes only apply to the block they directly follow.
-- Use caution with `:` in inline lines — once a colon is found, the rest is parsed as a value.
+```tml
+html head title: Hello body div
+```
+
+In this case, `title` receives the value `Hello body div`, and no `body` or `div` blocks are parsed.
+
+```tml
+html head title: "Hello" body div
+```
+
+In this case, the value `"Hello"` is clearly delimited for `title`, so parsing resumes after the quoted string. As a result, `body` is treated as a child of `html`, and `div` as its child.
 
 ## 2. Parsing Behavior
 
