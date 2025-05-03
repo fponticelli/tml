@@ -48,24 +48,28 @@ section id=about class=main
 ### 1.3 Attributes
 
 - Format: `key=value`
-- Types are inferred:
+- Values for attributes and value nodes share the same type system and parsing rules.
+- Supported value types include:
 
-  - Unquoted: `true`, `false`, numbers → parsed as boolean/number
-  - Quoted: `'string'` or `"string"` → always a string. A quote can be escaped with a backslash (ex: `"\""`).
-  - Object/array: Use JSON-like inline syntax: `{ key: [1, true] }`
+  - **Booleans**: `true`, `false`
+  - **Numbers**: Integer and decimal numbers (`42`, `3.14`)
+  - **Strings**: Quoted with `'` or `"`. Escapes allowed with backslashes.
+  - **Objects**: JSON-like syntax (e.g. `{ key: "value" }`)
+  - **Arrays**: Square-bracketed values, optionally nested (e.g. `[1, true, "text"]`)
 
-```tml
-config={ key1: "value1", key2: ["valueA", "valueB"] }
-```
-
-- Boolean shortcut: `checked!` → `checked=true`
+- Quoted values are always parsed as strings. Unquoted values are interpreted as boolean, number, or plain string depending on content.
+- Boolean shortcut syntax: `key!` is equivalent to `key=true`
 - Attribute **order is preserved**
 - **Multiple attributes with the same name are allowed** and are retained in the order they appear — no assumption is made that the last one wins.
+
+```tml
+options={ verbose: true, retries: 3, tags: ["a", "b", "c"] }
+```
 
 ### 1.4 Values
 
 - Prefixed with `:`
-- A `ValueNode` is an anonymous literal, and can appear inline or nested:
+- A `ValueNode` is a literal value (boolean, number, string, object, or array). It shares the same type system and parsing rules as attribute values.
 
 ```tml
 : true
@@ -99,13 +103,29 @@ html
     div: Welcome!
 ```
 
-- Single-line: `key: value`
-- Multi-line:
+- Inline values begin with `key:`, followed by the value content on the same line.
+- If the value is a structured type (e.g. an object, array, or quoted string), it may span multiple lines, as long as indentation and braces/brackets are balanced.
+
+```tml
+config: {
+  server: "api.example.com",
+  retries: 3,
+  features: [
+    "fast-start",
+    "auto-retry"
+  ]
+}
+```
+
+This is parsed as a single `ValueNode` starting after the colon.
+
+- Multi-line form: indented text becomes a single string
 
 ```tml
 description:
-  This is a multiline block
-  that will be parsed as a single string
+  This is a multiline string
+  that spans several lines
+  and is parsed as one value
 ```
 
 ### 1.5 Comments
