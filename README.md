@@ -2,6 +2,16 @@
 
 This is a monorepo for the Typed Markup Language (TML) ecosystem.
 
+## Development Workflow
+
+This project uses pre-commit hooks to ensure code quality. The hooks run:
+
+- Linting
+- Formatting
+- Tests
+
+These checks run automatically when you commit changes.
+
 ## Packages
 
 - [tml-parser](./packages/tml-parser): A parser for the Typed Markup Language

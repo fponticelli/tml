@@ -11,12 +11,16 @@
     "lint:fix": "turbo run lint:fix",
     "test": "turbo run test",
     "format:fix": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "format": "prettier --check \"**/*.{ts,tsx,md,json}\""
+    "format": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "prepare": "husky",
+    "pre-commit": "lint-staged"
   },
   "devDependencies": {
     "@eslint/js": "9.26.0",
     "eslint": "9.26.0",
     "globals": "16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
     "prettier": "3.5.3",
     "turbo": "2.5.2",
     "typescript": "5.8.3",
