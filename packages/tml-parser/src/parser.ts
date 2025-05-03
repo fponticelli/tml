@@ -123,25 +123,95 @@ function parseValue(value: string, position?: Position): Value {
  */
 function parseObjectValue(value: string, position?: Position): PositionedObjectValue {
   const fields: Array<ObjectField | CommentNode> = []
-  const content = value.trim().slice(1, -1).trim()
+  let content = value.trim().slice(1, -1).trim()
 
-  // Simple implementation - in a real parser, you'd need a more robust approach
-  // to handle nested objects, arrays, and proper tokenization
-  if (content) {
-    const pairs = content.split(',')
+  // Handle multiline objects by normalizing whitespace
+  if (content.includes('\n')) {
+    // Remove common indentation
+    const lines = content.split(/\r?\n/)
+    const indentations = lines
+      .filter(line => line.trim().length > 0)
+      .map(line => line.match(/^(\s*)/)?.[1].length || 0)
 
-    for (const pair of pairs) {
-      const colonIndex = pair.indexOf(':')
-      if (colonIndex > 0) {
-        const key = pair.slice(0, colonIndex).trim()
-        const fieldValue = pair.slice(colonIndex + 1).trim()
-
-        fields.push({
-          type: 'Field',
-          key,
-          value: parseValue(fieldValue),
-          position
+    if (indentations.length > 0) {
+      const minIndent = Math.min(...indentations)
+      content = lines
+        .map(line => {
+          if (line.trim().length === 0) return ''
+          return line.substring(Math.min(minIndent, line.length))
         })
+        .join(' ')
+        .trim()
+    } else {
+      content = lines.join(' ').trim()
+    }
+  }
+
+  // More robust parsing for nested structures
+  if (content) {
+    let currentKey = ''
+    let currentValue = ''
+    let inQuote: string | null = null
+    let inObject = 0
+    let inArray = 0
+    let collectingKey = true
+
+    for (let i = 0; i <= content.length; i++) {
+      const char = i < content.length ? content[i] : ','  // Add a comma at the end to process the last field
+      const prevChar = i > 0 ? content[i - 1] : ''
+
+      // Handle quotes
+      if ((char === '"' || char === "'") && prevChar !== '\\') {
+        if (inQuote === char) {
+          inQuote = null
+        } else if (inQuote === null) {
+          inQuote = char
+        }
+      }
+
+      // Handle nested objects
+      if (char === '{' && inQuote === null) {
+        inObject++
+      } else if (char === '}' && inQuote === null) {
+        inObject--
+      }
+
+      // Handle nested arrays
+      if (char === '[' && inQuote === null) {
+        inArray++
+      } else if (char === ']' && inQuote === null) {
+        inArray--
+      }
+
+      // Handle field separator
+      if (char === ':' && inQuote === null && inObject === 0 && inArray === 0 && collectingKey) {
+        currentKey = currentKey.trim()
+        collectingKey = false
+        continue
+      }
+
+      // Handle value separator
+      if (char === ',' && inQuote === null && inObject === 0 && inArray === 0) {
+        if (currentKey) {
+          currentValue = currentValue.trim()
+          fields.push({
+            type: 'Field',
+            key: currentKey,
+            value: parseValue(currentValue, position),
+            position
+          })
+        }
+        currentKey = ''
+        currentValue = ''
+        collectingKey = true
+        continue
+      }
+
+      // Collect characters
+      if (collectingKey) {
+        currentKey += char
+      } else {
+        currentValue += char
       }
     }
   }
@@ -158,19 +228,79 @@ function parseObjectValue(value: string, position?: Position): PositionedObjectV
  */
 function parseArrayValue(value: string, position?: Position): PositionedArrayValue {
   const elements: Array<ArrayElement | CommentNode> = []
-  const content = value.trim().slice(1, -1).trim()
+  let content = value.trim().slice(1, -1).trim()
 
-  // Simple implementation - in a real parser, you'd need a more robust approach
-  // to handle nested arrays, objects, and proper tokenization
+  // Handle multiline arrays by normalizing whitespace
+  if (content.includes('\n')) {
+    // Remove common indentation
+    const lines = content.split(/\r?\n/)
+    const indentations = lines
+      .filter(line => line.trim().length > 0)
+      .map(line => line.match(/^(\s*)/)?.[1].length || 0)
+
+    if (indentations.length > 0) {
+      const minIndent = Math.min(...indentations)
+      content = lines
+        .map(line => {
+          if (line.trim().length === 0) return ''
+          return line.substring(Math.min(minIndent, line.length))
+        })
+        .join(' ')
+        .trim()
+    } else {
+      content = lines.join(' ').trim()
+    }
+  }
+
+  // More robust parsing for nested structures
   if (content) {
-    const items = content.split(',')
+    let currentValue = ''
+    let inQuote: string | null = null
+    let inObject = 0
+    let inArray = 0
 
-    for (const item of items) {
-      elements.push({
-        type: 'Element',
-        value: parseValue(item.trim()),
-        position
-      })
+    for (let i = 0; i <= content.length; i++) {
+      const char = i < content.length ? content[i] : ','  // Add a comma at the end to process the last element
+      const prevChar = i > 0 ? content[i - 1] : ''
+
+      // Handle quotes
+      if ((char === '"' || char === "'") && prevChar !== '\\') {
+        if (inQuote === char) {
+          inQuote = null
+        } else if (inQuote === null) {
+          inQuote = char
+        }
+      }
+
+      // Handle nested objects
+      if (char === '{' && inQuote === null) {
+        inObject++
+      } else if (char === '}' && inQuote === null) {
+        inObject--
+      }
+
+      // Handle nested arrays
+      if (char === '[' && inQuote === null) {
+        inArray++
+      } else if (char === ']' && inQuote === null) {
+        inArray--
+      }
+
+      // Handle element separator
+      if (char === ',' && inQuote === null && inObject === 0 && inArray === 0) {
+        if (currentValue.trim()) {
+          elements.push({
+            type: 'Element',
+            value: parseValue(currentValue.trim(), position),
+            position
+          })
+        }
+        currentValue = ''
+        continue
+      }
+
+      // Collect characters
+      currentValue += char
     }
   }
 
@@ -416,20 +546,45 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
     }
   }
 
+  // Handle attributes (key=value or key!) on their own line
+  if ((trimmedLine.includes('=') || trimmedLine.endsWith('!')) &&
+      !trimmedLine.includes(' ') && !trimmedLine.includes(':')) {
+    return {
+      indent,
+      node: parseAttribute(trimmedLine, lineNumber, indent)
+    }
+  }
+
   // Handle block nodes with values (e.g., "title: My Page")
   const colonIndex = trimmedLine.indexOf(':')
   if (colonIndex > 0 && !trimmedLine.substring(0, colonIndex).includes(' ')) {
     const blockName = trimmedLine.substring(0, colonIndex)
     const valueText = trimmedLine.substring(colonIndex)
-    const valueNode = parseValueNode(valueText, lineNumber, indent + colonIndex)
 
-    return {
-      indent,
-      node: {
-        type: 'Block',
-        name: blockName,
-        children: [valueNode],
-        position: createLinePosition(lineNumber, indent, indent + trimmedLine.length)
+    // If there's content after the colon, parse it as a value
+    if (valueText.length > 1 && valueText.trim().length > 1) {
+      const valueNode = parseValueNode(valueText, lineNumber, indent + colonIndex)
+
+      return {
+        indent,
+        node: {
+          type: 'Block',
+          name: blockName,
+          children: [valueNode],
+          position: createLinePosition(lineNumber, indent, indent + trimmedLine.length)
+        }
+      }
+    } else {
+      // If there's only a colon (or colon + whitespace), return just the block
+      // The multiline value will be handled by the main parser
+      return {
+        indent,
+        node: {
+          type: 'Block',
+          name: blockName,
+          children: [],
+          position: createLinePosition(lineNumber, indent, indent + trimmedLine.length)
+        }
       }
     }
   }
@@ -466,19 +621,92 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
       continue
     }
 
+    // Handle value nodes (inline with :)
+    if (token.startsWith(':')) {
+      // Find where the value ends
+      let valueEndIndex = i
+      let inQuote: string | null = null
+      let inObject = 0
+      let inArray = 0
+
+      // Collect tokens until we find a non-quoted, non-nested token that could be an attribute or block
+      for (let j = i; j < tokens.length; j++) {
+        const currentToken = tokens[j]
+
+        // Skip the first token which is ":"
+        if (j === i) {
+          valueEndIndex = j
+          continue
+        }
+
+        // Check if this token starts a new attribute or block
+        if (!inQuote && inObject === 0 && inArray === 0) {
+          // Check for attribute pattern
+          if (currentToken.includes('=') || currentToken.endsWith('!')) {
+            valueEndIndex = j - 1
+            break
+          }
+
+          // Check for block pattern (no special characters, not in quotes)
+          if (!currentToken.includes(':') &&
+              !currentToken.includes('=') &&
+              !currentToken.includes('!') &&
+              !currentToken.startsWith('"') &&
+              !currentToken.startsWith("'") &&
+              !currentToken.startsWith('{') &&
+              !currentToken.startsWith('[')) {
+            valueEndIndex = j - 1
+            break
+          }
+        }
+
+        // Track quotes, objects, and arrays
+        for (let k = 0; k < currentToken.length; k++) {
+          const char = currentToken[k]
+          const prevChar = k > 0 ? currentToken[k - 1] : ''
+
+          // Handle quotes
+          if ((char === '"' || char === "'") && prevChar !== '\\') {
+            if (inQuote === char) {
+              inQuote = null
+            } else if (inQuote === null) {
+              inQuote = char
+            }
+          }
+
+          // Handle objects
+          if (char === '{' && inQuote === null) {
+            inObject++
+          } else if (char === '}' && inQuote === null) {
+            inObject--
+          }
+
+          // Handle arrays
+          if (char === '[' && inQuote === null) {
+            inArray++
+          } else if (char === ']' && inQuote === null) {
+            inArray--
+          }
+        }
+
+        valueEndIndex = j
+      }
+
+      // Collect the value tokens
+      const valueText = tokens.slice(i, valueEndIndex + 1).join(' ')
+      children.push(parseValueNode(valueText, lineNumber, currentColumn))
+
+      // Update the current position
+      currentColumn += valueText.length + 1
+      i = valueEndIndex
+      continue
+    }
+
     // Handle attributes (key=value or key!)
     if (token.includes('=') || token.endsWith('!')) {
       children.push(parseAttribute(token, lineNumber, currentColumn))
       currentColumn += token.length + 1
       continue
-    }
-
-    // Handle value nodes (inline with :)
-    if (token.startsWith(':')) {
-      // Collect the rest of the tokens as the value
-      const valueText = tokens.slice(i).join(' ')
-      children.push(parseValueNode(valueText, lineNumber, currentColumn))
-      break
     }
 
     // Handle inline blocks
@@ -508,22 +736,115 @@ function parseLine(line: string, lineNumber: number): { indent: number; node: No
  * Main parser function that converts a TML string into an AST.
  */
 export function parseTML(input: string): Node[] {
-  const lines = input.split(/\r?\n/)
+  // Handle empty input
+  if (!input.trim()) {
+    return []
+  }
+
+  // Normalize line endings
+  const normalizedInput = input.replace(/\r\n/g, '\n')
+
+  // Check if this is a multiline object or array
+  const trimmed = normalizedInput.trim()
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    // If it's a standalone object/array, return it as a value node
+    if (!trimmed.includes('\n')) {
+      const valueNode: ValueNode = {
+        type: 'Value',
+        value: parseValue(trimmed),
+        position: { start: { line: 1, column: 0 }, end: { line: 1, column: trimmed.length } }
+      }
+      return [valueNode]
+    }
+  }
+
+  const lines = normalizedInput.split(/\n/)
   const root: Node[] = []
   const stack: { indent: number; node: BlockNode }[] = []
+
+  // Track multiline value collection
+  let collectingValue: { blockNode: BlockNode, startIndent: number, lines: string[] } | null = null
 
   // Process each line
   for (let i = 0; i < lines.length; i++) {
     const lineNumber = i + 1
-    const { indent, node } = parseLine(lines[i], lineNumber)
+    const line = lines[i]
+    const indent = line.search(/\S/)
 
-    // Skip null nodes (empty lines)
+    // Skip empty lines
+    if (indent === -1) {
+      continue
+    }
+
+    // Check if we're collecting a multiline value
+    if (collectingValue) {
+      // If this line has more indentation than the block with the multiline value,
+      // add it to the collected lines
+      if (indent > collectingValue.startIndent) {
+        collectingValue.lines.push(line)
+        continue
+      } else {
+        // We've reached the end of the multiline value, process it
+        const valueText = collectingValue.lines.join('\n')
+        const valueNode: ValueNode = {
+          type: 'Value',
+          value: parseTMLValue(valueText),
+          position: createPosition(lineNumber - collectingValue.lines.length,
+                                  collectingValue.startIndent,
+                                  lineNumber - 1,
+                                  collectingValue.lines[collectingValue.lines.length - 1].length)
+        }
+
+        collectingValue.blockNode.children.push(valueNode)
+        collectingValue = null
+
+        // Continue processing with the current line
+      }
+    }
+
+    // Check if this line is a block with a colon but no value (potential multiline value start)
+    if (line.trim().endsWith(':')) {
+      const { indent: blockIndent, node } = parseLine(line, lineNumber)
+
+      if (node && node.type === 'Block') {
+        // Start collecting a multiline value
+        collectingValue = {
+          blockNode: node,
+          startIndent: blockIndent,
+          lines: []
+        }
+
+        // Handle indentation to build the hierarchy
+        while (stack.length > 0 && blockIndent <= stack[stack.length - 1].indent) {
+          stack.pop()
+        }
+
+        if (stack.length === 0) {
+          // Add to root if there's no parent
+          root.push(node)
+        } else {
+          // Add to parent's children
+          stack[stack.length - 1].node.children.push(node)
+        }
+
+        // Push block node to the stack for potential children
+        stack.push({ indent: blockIndent, node })
+
+        continue
+      }
+    }
+
+    // Normal line processing
+    const { indent: nodeIndent, node } = parseLine(line, lineNumber)
+
+    // Skip null nodes
     if (!node) {
       continue
     }
 
     // Handle indentation to build the hierarchy
-    while (stack.length > 0 && indent <= stack[stack.length - 1].indent) {
+    while (stack.length > 0 && nodeIndent <= stack[stack.length - 1].indent) {
       stack.pop()
     }
 
@@ -537,8 +858,23 @@ export function parseTML(input: string): Node[] {
 
     // Push block nodes to the stack for potential children
     if (node.type === 'Block') {
-      stack.push({ indent, node })
+      stack.push({ indent: nodeIndent, node })
     }
+  }
+
+  // Process any remaining multiline value
+  if (collectingValue) {
+    const valueText = collectingValue.lines.join('\n')
+    const valueNode: ValueNode = {
+      type: 'Value',
+      value: parseTMLValue(valueText),
+      position: createPosition(lines.length - collectingValue.lines.length + 1,
+                              collectingValue.startIndent,
+                              lines.length,
+                              collectingValue.lines[collectingValue.lines.length - 1].length)
+    }
+
+    collectingValue.blockNode.children.push(valueNode)
   }
 
   return root
@@ -548,8 +884,48 @@ export function parseTML(input: string): Node[] {
  * Parses a multiline TML string into a single value.
  */
 export function parseTMLValue(input: string): Value {
+  // Check if this is a multiline object or array
+  const trimmed = input.trim()
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    return parseValue(trimmed)
+  }
+
+  // Handle multiline text according to the spec (section 1.4)
   const lines = input.split(/\r?\n/)
-  const trimmedLines = lines.map(line => line.trim())
+
+  if (lines.length > 1) {
+    // Find the minimum indentation (excluding empty lines)
+    const nonEmptyLines = lines.filter(line => line.trim().length > 0)
+
+    if (nonEmptyLines.length > 0) {
+      const indentations = nonEmptyLines
+        .map(line => line.match(/^(\s*)/)?.[1].length || 0)
+
+      const minIndent = Math.min(...indentations)
+
+      // Remove the common indentation from each line
+      const processedLines = lines
+        .map(line => {
+          if (line.trim().length === 0) return ''
+          return line.substring(Math.min(minIndent, line.length))
+        })
+
+      // Join with spaces as per the spec
+      const processed = processedLines
+        .filter(line => line.length > 0)
+        .join(' ')
+        .trim()
+
+      return {
+        type: 'String',
+        value: processed
+      }
+    }
+  }
+
+  // Standard behavior - join with spaces
+  const trimmedLines = lines.map(line => line.trim()).filter(line => line.length > 0)
   const joined = trimmedLines.join(' ')
 
   return parseValue(joined)

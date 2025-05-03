@@ -7,7 +7,11 @@ import {
   StringValue,
   NumberValue,
   BooleanValue,
-  Node
+  Node,
+  PositionedObjectValue,
+  PositionedArrayValue,
+  ArrayElement,
+  ObjectField
 } from '../src/types'
 
 /**
@@ -17,11 +21,11 @@ export function assertBlockNode(node: Node, name: string, childrenCount?: number
   expect(node.type).toBe('Block')
   const blockNode = node as BlockNode
   expect(blockNode.name).toBe(name)
-  
+
   if (childrenCount !== undefined) {
     expect(blockNode.children.length).toBe(childrenCount)
   }
-  
+
   return blockNode
 }
 
@@ -77,7 +81,7 @@ export function findChildBlockByName(parent: BlockNode, name: string): BlockNode
   const child = parent.children.find(
     child => child.type === 'Block' && (child as BlockNode).name === name
   ) as BlockNode | undefined
-  
+
   return child
 }
 
@@ -124,10 +128,10 @@ export function assertBlockHasAttribute(block: BlockNode, key: string, valueType
   const attribute = block.children.find(
     child => child.type === 'Attribute' && (child as Attribute).key === key
   ) as Attribute | undefined
-  
+
   expect(attribute).toBeDefined()
   expect(attribute!.value.type).toBe(valueType)
-  
+
   if (value !== undefined) {
     if (valueType === 'String') {
       expect((attribute!.value as StringValue).value).toBe(value)
@@ -136,5 +140,147 @@ export function assertBlockHasAttribute(block: BlockNode, key: string, valueType
     } else if (valueType === 'Boolean') {
       expect((attribute!.value as BooleanValue).value).toBe(value)
     }
+  }
+}
+
+/**
+ * Helper function to assert that a block has multiple attributes
+ */
+export function assertBlockHasAttributes(block: BlockNode, attributes: Array<{key: string, valueType: string, value?: any}>): void {
+  const attributeNodes = block.children.filter(
+    child => child.type === 'Attribute'
+  ) as Attribute[]
+
+  expect(attributeNodes.length).toBeGreaterThanOrEqual(attributes.length)
+
+  for (const attr of attributes) {
+    assertBlockHasAttribute(block, attr.key, attr.valueType, attr.value)
+  }
+}
+
+/**
+ * Helper function to assert that a node is an object value
+ */
+export function assertObjectValue(valueNode: ValueNode): PositionedObjectValue {
+  expect(valueNode.value.type).toBe('Object')
+  return valueNode.value as PositionedObjectValue
+}
+
+/**
+ * Helper function to assert that a node is an array value
+ */
+export function assertArrayValue(valueNode: ValueNode): PositionedArrayValue {
+  expect(valueNode.value.type).toBe('Array')
+  return valueNode.value as PositionedArrayValue
+}
+
+/**
+ * Helper function to assert that an object has a specific field
+ */
+export function assertObjectHasField(obj: PositionedObjectValue, key: string, valueType: string, value?: any): void {
+  const field = obj.fields.find(
+    field => field.type === 'Field' && (field as ObjectField).key === key
+  ) as ObjectField | undefined
+
+  expect(field).toBeDefined()
+  expect(field!.value.type).toBe(valueType)
+
+  if (value !== undefined) {
+    if (valueType === 'String') {
+      expect((field!.value as StringValue).value).toBe(value)
+    } else if (valueType === 'Number') {
+      expect((field!.value as NumberValue).value).toBe(value)
+    } else if (valueType === 'Boolean') {
+      expect((field!.value as BooleanValue).value).toBe(value)
+    }
+  }
+}
+
+/**
+ * Helper function to assert that an array has a specific element
+ */
+export function assertArrayHasElement(arr: PositionedArrayValue, index: number, valueType: string, value?: any): void {
+  expect(arr.elements.length).toBeGreaterThan(index)
+
+  const element = arr.elements[index] as ArrayElement
+  expect(element.type).toBe('Element')
+  expect(element.value.type).toBe(valueType)
+
+  if (value !== undefined) {
+    if (valueType === 'String') {
+      expect((element.value as StringValue).value).toBe(value)
+    } else if (valueType === 'Number') {
+      expect((element.value as NumberValue).value).toBe(value)
+    } else if (valueType === 'Boolean') {
+      expect((element.value as BooleanValue).value).toBe(value)
+    }
+  }
+}
+
+/**
+ * Helper function to find an attribute in a block
+ */
+export function findAttribute(block: BlockNode, key: string): Attribute | undefined {
+  return block.children.find(
+    child => child.type === 'Attribute' && (child as Attribute).key === key
+  ) as Attribute | undefined
+}
+
+/**
+ * Helper function to find a value node in a block's children
+ */
+export function findValueNode(block: BlockNode): ValueNode | undefined {
+  return block.children.find(
+    child => child.type === 'Value'
+  ) as ValueNode | undefined
+}
+
+/**
+ * Helper function to count attributes in a block
+ */
+export function countAttributes(block: BlockNode): number {
+  return block.children.filter(child => child.type === 'Attribute').length
+}
+
+/**
+ * Helper function to count value nodes in a block
+ */
+export function countValueNodes(block: BlockNode): number {
+  return block.children.filter(child => child.type === 'Value').length
+}
+
+/**
+ * Helper function to count comment nodes in a block
+ */
+export function countCommentNodes(block: BlockNode): number {
+  return block.children.filter(child => child.type === 'Comment').length
+}
+
+/**
+ * Helper function to assert that a block has a specific number of each node type
+ */
+export function assertBlockChildCounts(
+  block: BlockNode,
+  counts: {
+    attributes?: number,
+    values?: number,
+    blocks?: number,
+    comments?: number
+  }
+): void {
+  if (counts.attributes !== undefined) {
+    expect(countAttributes(block)).toBe(counts.attributes)
+  }
+
+  if (counts.values !== undefined) {
+    expect(countValueNodes(block)).toBe(counts.values)
+  }
+
+  if (counts.blocks !== undefined) {
+    expect(block.children.filter(child => child.type === 'Block').length).toBe(counts.blocks)
+  }
+
+  if (counts.comments !== undefined) {
+    expect(countCommentNodes(block)).toBe(counts.comments)
   }
 }
