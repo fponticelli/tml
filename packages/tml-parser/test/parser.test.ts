@@ -8,8 +8,138 @@ import {
   StringValue,
   NumberValue,
   BooleanValue,
-  Value
+  Value,
+  Node
 } from '../src/types'
+
+/**
+ * Helper function to assert that a node is a BlockNode
+ */
+function assertBlockNode(node: Node, name: string, childrenCount?: number): BlockNode {
+  expect(node.type).toBe('Block')
+  const blockNode = node as BlockNode
+  expect(blockNode.name).toBe(name)
+
+  if (childrenCount !== undefined) {
+    expect(blockNode.children.length).toBe(childrenCount)
+  }
+
+  return blockNode
+}
+
+/**
+ * Helper function to assert that a node is a ValueNode
+ */
+function assertValueNode(node: Node, expectedValueType: string): ValueNode {
+  expect(node.type).toBe('Value')
+  const valueNode = node as ValueNode
+  expect(valueNode.value.type).toBe(expectedValueType)
+  return valueNode
+}
+
+/**
+ * Helper function to assert that a node is a CommentNode
+ */
+function assertCommentNode(node: Node, expectedValue: string, isLineComment: boolean): CommentNode {
+  expect(node.type).toBe('Comment')
+  const commentNode = node as CommentNode
+  expect(commentNode.value).toBe(expectedValue)
+  expect(commentNode.isLineComment).toBe(isLineComment)
+  return commentNode
+}
+
+/**
+ * Helper function to get a string value from a value node
+ */
+function getStringValue(valueNode: ValueNode): string {
+  expect(valueNode.value.type).toBe('String')
+  return (valueNode.value as StringValue).value
+}
+
+/**
+ * Helper function to get a number value from a value node
+ */
+function getNumberValue(valueNode: ValueNode): number {
+  expect(valueNode.value.type).toBe('Number')
+  return (valueNode.value as NumberValue).value
+}
+
+/**
+ * Helper function to get a boolean value from a value node
+ */
+function getBooleanValue(valueNode: ValueNode): boolean {
+  expect(valueNode.value.type).toBe('Boolean')
+  return (valueNode.value as BooleanValue).value
+}
+
+/**
+ * Helper function to find a child block node by name
+ */
+function findChildBlockByName(parent: BlockNode, name: string): BlockNode | undefined {
+  const child = parent.children.find(
+    child => child.type === 'Block' && (child as BlockNode).name === name
+  ) as BlockNode | undefined
+
+  return child
+}
+
+/**
+ * Helper function to assert the existence of a child block and return it
+ */
+function assertChildBlock(parent: BlockNode, name: string, childrenCount?: number): BlockNode {
+  const child = findChildBlockByName(parent, name)
+  expect(child).toBeDefined()
+  return assertBlockNode(child!, name, childrenCount)
+}
+
+/**
+ * Helper function to assert that a block has a string value
+ */
+function assertBlockWithStringValue(block: BlockNode, expectedValue: string): void {
+  expect(block.children.length).toBe(1)
+  const valueNode = assertValueNode(block.children[0], 'String')
+  expect(getStringValue(valueNode)).toBe(expectedValue)
+}
+
+/**
+ * Helper function to assert that a block has a number value
+ */
+function assertBlockWithNumberValue(block: BlockNode, expectedValue: number): void {
+  expect(block.children.length).toBe(1)
+  const valueNode = assertValueNode(block.children[0], 'Number')
+  expect(getNumberValue(valueNode)).toBe(expectedValue)
+}
+
+/**
+ * Helper function to assert that a block has a boolean value
+ */
+function assertBlockWithBooleanValue(block: BlockNode, expectedValue: boolean): void {
+  expect(block.children.length).toBe(1)
+  const valueNode = assertValueNode(block.children[0], 'Boolean')
+  expect(getBooleanValue(valueNode)).toBe(expectedValue)
+}
+
+/**
+ * Helper function to assert that a block has a specific attribute
+ */
+function assertBlockHasAttribute(block: BlockNode, key: string, valueType: string, value?: any): void {
+  const attribute = block.children.find(
+    child => child.type === 'Attribute' && (child as Attribute).key === key
+  ) as Attribute | undefined
+
+  expect(attribute).toBeDefined()
+  expect(attribute!.value.type).toBe(valueType)
+
+  if (value !== undefined) {
+    if (valueType === 'String') {
+      expect((attribute!.value as StringValue).value).toBe(value)
+    } else if (valueType === 'Number') {
+      expect((attribute!.value as NumberValue).value).toBe(value)
+    } else if (valueType === 'Boolean') {
+      expect((attribute!.value as BooleanValue).value).toBe(value)
+    }
+  }
+}
 
 describe('TML Parser', () => {
   it('should parse an empty document', () => {
@@ -20,42 +150,23 @@ describe('TML Parser', () => {
   it('should parse a simple block', () => {
     const result = parseTML('html')
     expect(result.length).toBe(1)
-    expect(result[0].type).toBe('Block')
-    expect((result[0] as BlockNode).name).toBe('html')
-    expect((result[0] as BlockNode).children).toEqual([])
+    assertBlockNode(result[0], 'html', 0)
   })
 
   it('should parse a block with attributes', () => {
     const result = parseTML('html lang=en')
     expect(result.length).toBe(1)
-    expect(result[0].type).toBe('Block')
 
-    const block = result[0] as BlockNode
-    expect(block.name).toBe('html')
-    expect(block.children.length).toBe(1)
-
-    const attr = block.children[0] as Attribute
-    expect(attr.type).toBe('Attribute')
-    expect(attr.key).toBe('lang')
-    expect(attr.value.type).toBe('String')
-    const stringValue = attr.value as StringValue
-    expect(stringValue.value).toBe('en')
+    const block = assertBlockNode(result[0], 'html', 1)
+    assertBlockHasAttribute(block, 'lang', 'String', 'en')
   })
 
   it('should parse a block with a value', () => {
     const result = parseTML('title: My Page')
     expect(result.length).toBe(1)
-    expect(result[0].type).toBe('Block')
 
-    const block = result[0] as BlockNode
-    expect(block.name).toBe('title')
-    expect(block.children.length).toBe(1)
-
-    const valueNode = block.children[0] as ValueNode
-    expect(valueNode.type).toBe('Value')
-    expect(valueNode.value.type).toBe('String')
-    const stringValue = valueNode.value as StringValue
-    expect(stringValue.value).toBe('My Page')
+    const block = assertBlockNode(result[0], 'title', 1)
+    assertBlockWithStringValue(block, 'My Page')
   })
 
   it('should parse nested blocks based on indentation', () => {
@@ -68,29 +179,15 @@ describe('TML Parser', () => {
     const result = parseTML(input)
     expect(result.length).toBe(1)
 
-    const html = result[0] as BlockNode
-    expect(html.name).toBe('html')
-    expect(html.children.length).toBe(2)
+    const html = assertBlockNode(result[0], 'html', 2)
 
-    const head = html.children[0] as BlockNode
-    expect(head.name).toBe('head')
-    expect(head.children.length).toBe(1)
+    const head = assertChildBlock(html, 'head', 1)
+    const title = assertChildBlock(head, 'title', 1)
+    assertBlockWithStringValue(title, 'My Page')
 
-    const title = head.children[0] as BlockNode
-    expect(title.name).toBe('title')
-    expect(title.children.length).toBe(1)
-    const titleValue = (title.children[0] as ValueNode).value as StringValue
-    expect(titleValue.value).toBe('My Page')
-
-    const body = html.children[1] as BlockNode
-    expect(body.name).toBe('body')
-    expect(body.children.length).toBe(1)
-
-    const h1 = body.children[0] as BlockNode
-    expect(h1.name).toBe('h1')
-    expect(h1.children.length).toBe(1)
-    const h1Value = (h1.children[0] as ValueNode).value as StringValue
-    expect(h1Value.value).toBe('Hello World')
+    const body = assertChildBlock(html, 'body', 1)
+    const h1 = assertChildBlock(body, 'h1', 1)
+    assertBlockWithStringValue(h1, 'Hello World')
   })
 
   it('should parse comments', () => {
@@ -101,15 +198,11 @@ html // Inline comment
     const result = parseTML(input)
     expect(result.length).toBe(2)
 
-    const comment = result[0] as CommentNode
-    expect(comment.type).toBe('Comment')
-    expect(comment.value).toBe('This is a comment')
-    expect(comment.isLineComment).toBe(true)
+    assertCommentNode(result[0], 'This is a comment', true)
 
-    const html = result[1] as BlockNode
-    expect(html.name).toBe('html')
+    const html = assertBlockNode(result[1], 'html')
 
-    // Just check that we have at least one child node
+    // Check that we have at least one child node
     expect(html.children.length > 0).toBe(true)
 
     // Check that at least one of the children is a comment
@@ -129,32 +222,15 @@ values
     const result = parseTML(input)
     expect(result.length).toBe(1)
 
-    const values = result[0] as BlockNode
-    expect(values.name).toBe('values')
-
-    // Check that we have the expected number of children
+    const values = assertBlockNode(result[0], 'values')
     expect(values.children.length > 0).toBe(true)
 
-    // Find the nodes by their expected names
-    const stringNode = values.children.find(child =>
-      child.type === 'Block' && (child as BlockNode).name === 'string'
-    ) as BlockNode | undefined
-
-    const numberNode = values.children.find(child =>
-      child.type === 'Block' && (child as BlockNode).name === 'number'
-    ) as BlockNode | undefined
-
-    const booleanNode = values.children.find(child =>
-      child.type === 'Block' && (child as BlockNode).name === 'boolean'
-    ) as BlockNode | undefined
-
-    const objectNode = values.children.find(child =>
-      child.type === 'Block' && (child as BlockNode).name === 'object'
-    ) as BlockNode | undefined
-
-    const arrayNode = values.children.find(child =>
-      child.type === 'Block' && (child as BlockNode).name === 'array'
-    ) as BlockNode | undefined
+    // Find and assert each type of node
+    const stringNode = findChildBlockByName(values, 'string')
+    const numberNode = findChildBlockByName(values, 'number')
+    const booleanNode = findChildBlockByName(values, 'boolean')
+    const objectNode = findChildBlockByName(values, 'object')
+    const arrayNode = findChildBlockByName(values, 'array')
 
     // Check that we found all the nodes
     expect(stringNode).toBeDefined()
@@ -163,40 +239,20 @@ values
     expect(objectNode).toBeDefined()
     expect(arrayNode).toBeDefined()
 
-    // Check the string value
-    if (stringNode) {
-      const valueNode = stringNode.children[0] as ValueNode
-      expect(valueNode.value.type).toBe('String')
-      const stringValue = valueNode.value as StringValue
-      expect(stringValue.value).toBe('Hello World')
-    }
+    // Check the values
+    if (stringNode) assertBlockWithStringValue(stringNode, 'Hello World')
+    if (numberNode) assertBlockWithNumberValue(numberNode, 42)
+    if (booleanNode) assertBlockWithBooleanValue(booleanNode, true)
 
-    // Check the number value
-    if (numberNode) {
-      const valueNode = numberNode.children[0] as ValueNode
-      expect(valueNode.value.type).toBe('Number')
-      const numberValue = valueNode.value as NumberValue
-      expect(numberValue.value).toBe(42)
-    }
-
-    // Check the boolean value
-    if (booleanNode) {
-      const valueNode = booleanNode.children[0] as ValueNode
-      expect(valueNode.value.type).toBe('Boolean')
-      const booleanValue = valueNode.value as BooleanValue
-      expect(booleanValue.value).toBe(true)
-    }
-
-    // Check the object value
+    // Check object and array types
     if (objectNode) {
-      const valueNode = objectNode.children[0] as ValueNode
-      expect(valueNode.value.type).toBe('Object')
+      expect(objectNode.children.length).toBe(1)
+      assertValueNode(objectNode.children[0], 'Object')
     }
 
-    // Check the array value
     if (arrayNode) {
-      const valueNode = arrayNode.children[0] as ValueNode
-      expect(valueNode.value.type).toBe('Array')
+      expect(arrayNode.children.length).toBe(1)
+      assertValueNode(arrayNode.children[0], 'Array')
     }
   })
 
@@ -206,11 +262,8 @@ values
     const result = parseTML(input)
     expect(result.length).toBe(1)
 
-    const valueNode = result[0] as ValueNode
-    expect(valueNode.type).toBe('Value')
-    expect(valueNode.value.type).toBe('String')
-    const stringValue = valueNode.value as StringValue
-    expect(stringValue.value).toBe('This is a standalone value')
+    const valueNode = assertValueNode(result[0], 'String')
+    expect(getStringValue(valueNode)).toBe('This is a standalone value')
   })
 
   it('should parse boolean shortcut attributes', () => {
@@ -219,15 +272,8 @@ values
     const result = parseTML(input)
     expect(result.length).toBe(1)
 
-    const button = result[0] as BlockNode
-    expect(button.name).toBe('button')
-    expect(button.children.length).toBe(1)
-
-    const attr = button.children[0] as Attribute
-    expect(attr.key).toBe('disabled')
-    expect(attr.value.type).toBe('Boolean')
-    const boolValue = attr.value as BooleanValue
-    expect(boolValue.value).toBe(true)
+    const button = assertBlockNode(result[0], 'button', 1)
+    assertBlockHasAttribute(button, 'disabled', 'Boolean', true)
   })
 
   it('should parse inline blocks', () => {
@@ -237,9 +283,7 @@ values
     expect(result.length).toBe(1)
 
     // For now, we'll just check that the parsing doesn't fail
-    // The exact structure of inline blocks may need more work
-    const html = result[0] as BlockNode
-    expect(html.name).toBe('html')
+    const html = assertBlockNode(result[0], 'html')
     expect(html.children.length > 0).toBe(true)
   })
 
@@ -252,6 +296,6 @@ and should be joined together
 
     const result = parseTMLValue(input)
     expect(result.type).toBe('String')
-    expect(result.value).toBe('This is a multiline value that spans several lines and should be joined together')
+    expect((result as StringValue).value).toBe('This is a multiline value that spans several lines and should be joined together')
   })
 })
