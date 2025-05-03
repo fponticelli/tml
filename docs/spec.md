@@ -107,7 +107,7 @@ html head title: "Hello body div: Welcome!"
 
 // But this works
 html
-  head title: "Hello"
+  head title: Hello
   body div: Welcome!
 
 // Or:
