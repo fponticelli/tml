@@ -12,17 +12,38 @@ TML is a concise, human-readable markup language for representing hierarchical d
 
 ### 1.2 Blocks
 
-- A `BlockNode` starts with a name and optionally attributes and inline children.
-- Format: `name attr1=value1 attr2=value2 child1 child2`
-- Attributes come first; first non-attribute token begins the child list.
-- Block names may begin with `$` to support constructs like `$ref`, `$include`, etc.
+- A `BlockNode` begins a new structural node. It starts with a **name**, optionally followed by **attributes** and/or **children**.
+- Nesting is determined by indentation relative to the parent block.
+- The **block name** must be the first token on the line. It may begin with `$` for constructs like `$ref`, `$include`, etc.
+- **Attributes**, if any, follow the block name and precede child content.
+- **Children** may be listed either inline (on the same line) or indented below on subsequent lines.
+
+#### Example 1: Basic Nesting
 
 ```tml
-html lang=en
-  head title: Hello World
+html
+  head
+    title: My Website
     meta charset=UTF-8
-  $ref path="#/some/section"
+  body
+    h1: Welcome
+    p: This is TML
 ```
+
+#### Example 2: With Attributes
+
+```tml
+section id=about class=main
+  h2: About Us
+  p: We build clean specs.
+  ul
+    li: Compact
+    li: Typed
+    li: Human-readable
+```
+
+- In this example, `section` has attributes and three nested children.
+- Attributes are always associated with the block on the same line.
 
 ### 1.3 Attributes
 
@@ -120,7 +141,30 @@ html head title: Hello
   meta charset=UTF-8  // belongs to html, not head or title
 ```
 
----
+### 1.7 Inline Contents
+
+- Blocks can also define **inline children** on the same line, after attributes.
+- This allows for compact expressions of shallow hierarchies.
+
+#### Example
+
+```tml
+html head title: Hello body div: Welcome!
+```
+
+This is equivalent to:
+
+```tml
+html
+  head
+    title: Hello
+  body
+    div: Welcome!
+```
+
+- Inline children are parsed as nested block nodes in order.
+- Attributes only apply to the block they directly follow.
+- Use caution with `:` in inline lines — once a colon is found, the rest is parsed as a value.
 
 ## 2. Parsing Behavior
 
