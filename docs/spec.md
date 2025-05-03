@@ -1,6 +1,6 @@
 # Typed Markup Language (TML) — Specification
 
-TML is a concise, human-readable markup language for representing hierarchical data, inspired by XML, YAML, and HAML. It supports typed attributes and values, whitespace-based structure, and is content-agnostic, suitable for documents, configuration files, UI trees, and more.
+TML is a concise, human-readable markup language for representing hierarchical data, inspired by XML, HTML, YAML, and JSON. It supports typed attributes and values, whitespace-based structure, and is content-agnostic, suitable for documents, configuration files, UI trees, and more.
 
 ## 1. Syntax Rules
 
@@ -30,7 +30,7 @@ html lang=en
 - Types are inferred:
 
   - Unquoted: `true`, `false`, numbers → parsed as boolean/number
-  - Quoted: `'string'` or `"string"` → always a string
+  - Quoted: `'string'` or `"string"` → always a string. A quote can be escaped with a backslash (ex: `"\""`).
   - Object/array: Use JSON-like inline syntax: `{ key: [1, true] }`
 
 ```tml
@@ -39,7 +39,7 @@ config={ key1: "value1", key2: ["valueA", "valueB"] }
 
 - Boolean shortcut: `checked!` → `checked=true`
 - Attribute **order is preserved**
-- **Multiple attributes with the same name are allowed** and are retained in the order they appear — no assumption is made that the last one wins
+- **Multiple attributes with the same name are allowed** and are retained in the order they appear — no assumption is made that the last one wins.
 
 ### 1.4 Values
 
@@ -59,7 +59,7 @@ config={ key1: "value1", key2: ["valueA", "valueB"] }
 // Valid:
 title: Hello World
 
-// This will not work as expected
+// This might not work as expected
 html head title: Hello body div: Welcome!
 
 // It is equivalent to
@@ -90,8 +90,9 @@ description:
 ### 1.5 Comments
 
 - Line comment: `//` prefix
-- Inline comment: `/* comment */` inside attributes or children
-- `CommentNode`s may be preserved for tooling but ignored semantically
+- Inline or block comment: `/* comment */` inside attributes or children.
+- `CommentNode`s may be preserved for tooling but ignored semantically.
+- Comments can also be interleaved in structural values in arrays/objects.
 
 ### 1.6 Inline Nesting
 
@@ -112,7 +113,7 @@ html
     div: Welcome!
 ```
 
-- Indentation after an inline line applies to the **last full block** — not inline children
+- Indentation after an inline line applies to the **first full block** — not inline children
 
 ```tml
 html head title: Hello
@@ -132,8 +133,7 @@ html head title: Hello
 ## 3. Example
 
 ```tml
-$schema: "https://example.com/schema"
-$version: 1.0
+$schema: "https://example.com/schema/tml-html/1.0"
 
 html lang=en
   head
