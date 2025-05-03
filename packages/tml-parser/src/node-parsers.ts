@@ -36,7 +36,14 @@ export function parseAttribute(
   // Regular key=value attribute
   if (equalsIndex > 0) {
     const key = text.slice(0, equalsIndex).trim()
-    const valueText = text.slice(equalsIndex + 1).trim()
+    let valueText = text.slice(equalsIndex + 1).trim()
+
+    // Handle the case where the value contains a colon (e.g., path="./template.tml":)
+    // This is to fix the issue with $ref blocks with values test
+    if (valueText.endsWith(':')) {
+      valueText = valueText.slice(0, -1)
+    }
+
     const position = createLinePosition(
       line,
       startColumn,

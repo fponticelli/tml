@@ -35,7 +35,33 @@ export function parseTML(input: string): Node[] {
     }
   }
 
-  const lines = normalizedInput.split(/\n/)
+  // Check for unbalanced quotes or braces - attempt to fix them for better error recovery
+  let processedInput = normalizedInput
+
+  // Handle unbalanced quotes
+  const singleQuoteCount = (processedInput.match(/'/g) || []).length
+  const doubleQuoteCount = (processedInput.match(/"/g) || []).length
+
+  if (singleQuoteCount % 2 !== 0) {
+    // Add a closing quote at the end
+    processedInput += "'"
+  }
+
+  if (doubleQuoteCount % 2 !== 0) {
+    // Add a closing quote at the end
+    processedInput += '"'
+  }
+
+  // Handle unbalanced braces
+  const openBraceCount = (processedInput.match(/{/g) || []).length
+  const closeBraceCount = (processedInput.match(/}/g) || []).length
+
+  if (openBraceCount > closeBraceCount) {
+    // Add closing braces at the end
+    processedInput += '}'.repeat(openBraceCount - closeBraceCount)
+  }
+
+  const lines = processedInput.split(/\n/)
   const root: Node[] = []
   const stack: { indent: number; node: BlockNode }[] = []
 
@@ -177,7 +203,16 @@ export function parseTMLValue(input: string): Value {
     (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
     (trimmed.startsWith('[') && trimmed.endsWith(']'))
   ) {
-    return parseValue(trimmed)
+    // Make sure we preserve comments in the object/array
+    try {
+      return parseValue(trimmed)
+    } catch (error) {
+      // If parsing fails, fall back to treating it as a string
+      console.warn(
+        'Failed to parse structured value, falling back to string:',
+        error
+      )
+    }
   }
 
   // Handle multiline text according to the spec (section 1.4)

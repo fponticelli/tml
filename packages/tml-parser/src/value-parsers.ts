@@ -14,7 +14,10 @@ import {
 /**
  * Parses a string value, handling quotes and escapes.
  */
-export function parseStringValue(value: string, position?: Position): StringValue {
+export function parseStringValue(
+  value: string,
+  position?: Position
+): StringValue {
   let parsed = value.trim()
 
   // Handle quoted strings
@@ -43,7 +46,10 @@ export function parseStringValue(value: string, position?: Position): StringValu
 /**
  * Parses a number value.
  */
-export function parseNumberValue(value: string, position?: Position): NumberValue {
+export function parseNumberValue(
+  value: string,
+  position?: Position
+): NumberValue {
   return {
     type: 'Number',
     value: Number(value.trim()),
@@ -54,7 +60,10 @@ export function parseNumberValue(value: string, position?: Position): NumberValu
 /**
  * Parses a boolean value.
  */
-export function parseBooleanValue(value: string, position?: Position): BooleanValue {
+export function parseBooleanValue(
+  value: string,
+  position?: Position
+): BooleanValue {
   return {
     type: 'Boolean',
     value: value.trim().toLowerCase() === 'true',
@@ -132,10 +141,64 @@ export function parseObjectValue(
     let inObject = 0
     let inArray = 0
     let collectingKey = true
+    let inLineComment = false
+    let inBlockComment = false
+    let commentBuffer = ''
 
     for (let i = 0; i <= content.length; i++) {
       const char = i < content.length ? content[i] : ',' // Add a comma at the end to process the last field
       const prevChar = i > 0 ? content[i - 1] : ''
+      const nextChar = i < content.length - 1 ? content[i + 1] : ''
+
+      // Handle comments
+      if (!inQuote && !inBlockComment && char === '/' && nextChar === '/') {
+        inLineComment = true
+        commentBuffer = '//'
+        i++ // Skip the next slash
+        continue
+      }
+
+      if (!inQuote && !inLineComment && char === '/' && nextChar === '*') {
+        inBlockComment = true
+        commentBuffer = '/*'
+        i++ // Skip the next asterisk
+        continue
+      }
+
+      // End of line comment
+      if (inLineComment && (char === '\n' || i === content.length)) {
+        fields.push({
+          type: 'Comment',
+          value: commentBuffer.slice(2).trim(),
+          isLineComment: true,
+          position,
+        })
+        inLineComment = false
+        commentBuffer = ''
+
+        // If we're at the end of the content, don't process the comma
+        if (i === content.length) continue
+      }
+
+      // End of block comment
+      if (inBlockComment && char === '*' && nextChar === '/') {
+        fields.push({
+          type: 'Comment',
+          value: commentBuffer.slice(2).trim(),
+          isLineComment: false,
+          position,
+        })
+        inBlockComment = false
+        commentBuffer = ''
+        i++ // Skip the next slash
+        continue
+      }
+
+      // Collect comment content
+      if (inLineComment || inBlockComment) {
+        commentBuffer += char
+        continue
+      }
 
       // Handle quotes
       if ((char === '"' || char === "'") && prevChar !== '\\') {
@@ -244,10 +307,64 @@ export function parseArrayValue(
     let inQuote: string | null = null
     let inObject = 0
     let inArray = 0
+    let inLineComment = false
+    let inBlockComment = false
+    let commentBuffer = ''
 
     for (let i = 0; i <= content.length; i++) {
       const char = i < content.length ? content[i] : ',' // Add a comma at the end to process the last element
       const prevChar = i > 0 ? content[i - 1] : ''
+      const nextChar = i < content.length - 1 ? content[i + 1] : ''
+
+      // Handle comments
+      if (!inQuote && !inBlockComment && char === '/' && nextChar === '/') {
+        inLineComment = true
+        commentBuffer = '//'
+        i++ // Skip the next slash
+        continue
+      }
+
+      if (!inQuote && !inLineComment && char === '/' && nextChar === '*') {
+        inBlockComment = true
+        commentBuffer = '/*'
+        i++ // Skip the next asterisk
+        continue
+      }
+
+      // End of line comment
+      if (inLineComment && (char === '\n' || i === content.length)) {
+        elements.push({
+          type: 'Comment',
+          value: commentBuffer.slice(2).trim(),
+          isLineComment: true,
+          position,
+        })
+        inLineComment = false
+        commentBuffer = ''
+
+        // If we're at the end of the content, don't process the comma
+        if (i === content.length) continue
+      }
+
+      // End of block comment
+      if (inBlockComment && char === '*' && nextChar === '/') {
+        elements.push({
+          type: 'Comment',
+          value: commentBuffer.slice(2).trim(),
+          isLineComment: false,
+          position,
+        })
+        inBlockComment = false
+        commentBuffer = ''
+        i++ // Skip the next slash
+        continue
+      }
+
+      // Collect comment content
+      if (inLineComment || inBlockComment) {
+        commentBuffer += char
+        continue
+      }
 
       // Handle quotes
       if ((char === '"' || char === "'") && prevChar !== '\\') {

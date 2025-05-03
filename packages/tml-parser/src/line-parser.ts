@@ -1,6 +1,11 @@
 import { Node } from '@/types'
 import { createLinePosition } from './position'
-import { parseAttribute, parseBlockComment, parseLineComment, parseValueNode } from './node-parsers'
+import {
+  parseAttribute,
+  parseBlockComment,
+  parseLineComment,
+  parseValueNode,
+} from './node-parsers'
 import { tokenizeLine } from './tokenizer'
 
 /**
@@ -67,6 +72,45 @@ export function parseLine(
 
     // If there's content after the colon, parse it as a value
     if (valueText.length > 1 && valueText.trim().length > 1) {
+      // Special handling for $ref blocks with values
+      // Check if this is a block with attributes followed by a value
+      if (blockName.startsWith('$') && blockName.includes('=')) {
+        // Extract the actual block name and the attribute
+        const equalIndex = blockName.indexOf('=')
+        const actualBlockName = blockName.substring(0, equalIndex).trim()
+        const attributeText = blockName.substring(equalIndex)
+
+        // Parse the attribute
+        const attribute = parseAttribute(
+          attributeText,
+          lineNumber,
+          indent + actualBlockName.length
+        )
+
+        // Parse the value
+        const valueNode = parseValueNode(
+          valueText,
+          lineNumber,
+          indent + colonIndex
+        )
+
+        // Create the block with both attribute and value
+        return {
+          indent,
+          node: {
+            type: 'Block',
+            name: actualBlockName,
+            children: [attribute, valueNode],
+            position: createLinePosition(
+              lineNumber,
+              indent,
+              indent + trimmedLine.length
+            ),
+          },
+        }
+      }
+
+      // Normal case - block with value
       const valueNode = parseValueNode(
         valueText,
         lineNumber,
@@ -222,6 +266,13 @@ export function parseLine(
 
     // Handle attributes (key=value or key!)
     if (token.includes('=') || token.endsWith('!')) {
+      // Handle invalid attribute syntax (e.g., =invalid)
+      if (token.startsWith('=')) {
+        // Skip invalid attributes but continue parsing
+        currentColumn += token.length + 1
+        continue
+      }
+
       children.push(parseAttribute(token, lineNumber, currentColumn))
       currentColumn += token.length + 1
       continue
