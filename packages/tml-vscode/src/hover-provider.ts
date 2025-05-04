@@ -89,15 +89,11 @@ function getHoverInfo(
     }
 
     case 'Value': {
-      const valueNode = node as ValueNode & { valueType?: string }
+      const valueNode = node as ValueNode
       markdown.appendMarkdown(`**Value:**`)
 
       // Add value type information
-      if (valueNode.valueType) {
-        markdown.appendMarkdown(` \`${valueNode.valueType}\``)
-      } else {
-        markdown.appendMarkdown(` \`${valueNode.value.type}\``)
-      }
+      markdown.appendMarkdown(` \`${valueNode.value.type}\``)
 
       // Add parent information
       if (parent) {
@@ -108,15 +104,11 @@ function getHoverInfo(
     }
 
     case 'Attribute': {
-      const attrNode = node as Attribute & { valueType?: string }
+      const attrNode = node as Attribute
       markdown.appendMarkdown(`**Attribute**: \`${attrNode.key}\``)
 
       // Add value type information
-      if (attrNode.valueType) {
-        markdown.appendMarkdown(` \`${attrNode.valueType}\``)
-      } else {
-        markdown.appendMarkdown(` \`${attrNode.value.type}\``)
-      }
+      markdown.appendMarkdown(` \`${attrNode.value.type}\``)
 
       // Add parent information
       if (parent) {

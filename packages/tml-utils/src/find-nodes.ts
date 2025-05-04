@@ -1,11 +1,6 @@
 import { Node, BlockNode, ValueNode, Attribute } from '@tml/parser'
 
 /**
- * Type for nodes with additional value type information
- */
-export type NodeWithValueType = Node & { valueType?: string }
-
-/**
  * Interface for position-like objects that can be used to check if a position is within a range
  */
 export interface PositionLike {
@@ -77,10 +72,7 @@ export function findNodeAtPosition(
           valueNode.value.position &&
           isPositionInRange(position, valueNode.value.position)
         ) {
-          // Create a new object with the value type information
-          const result = Object.assign({}, node) as NodeWithValueType
-          result.valueType = valueNode.value.type
-          return result
+          return node
         }
       }
 
@@ -91,10 +83,7 @@ export function findNodeAtPosition(
           attrNode.value.position &&
           isPositionInRange(position, attrNode.value.position)
         ) {
-          // Create a new object with the value type information
-          const result = Object.assign({}, node) as NodeWithValueType
-          result.valueType = attrNode.value.type
-          return result
+          return node
         }
       }
 

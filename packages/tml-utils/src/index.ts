@@ -5,7 +5,6 @@ export {
   findNodesByType,
   findBlocksByName,
   isPositionInRange,
-  type NodeWithValueType,
   type PositionLike,
   type RangeLike,
 } from '@/find-nodes'
