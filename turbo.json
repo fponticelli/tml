@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "compile"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", "out/**", "*.vsix"]
     },
     "lint": {
@@ -11,9 +11,6 @@
     },
     "lint:fix": {
       "outputs": []
-    },
-    "compile": {
-      "outputs": ["dist/**", "out/**"]
     },
     "dev": {
       "cache": false,

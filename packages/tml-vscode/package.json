@@ -43,7 +43,6 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn build:prod",
-    "compile": "vite build",
     "build:prod": "vite build --mode production",
     "watch": "vite build --watch --mode development",
     "prepare-package": "node ./scripts/prepare-package.js",

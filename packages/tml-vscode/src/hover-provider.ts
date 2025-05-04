@@ -7,7 +7,6 @@ import {
   Attribute,
   Position,
   Point,
-  CommentNode,
 } from '@tml/parser'
 import {
   findNodeAtPosition as findNodeAtPositionUtil,

@@ -9,7 +9,6 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "compile": "turbo run compile",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
