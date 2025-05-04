@@ -1,0 +1,57 @@
+{
+  "name": "tml-vscode",
+  "displayName": "TML Language Support",
+  "description": "Syntax highlighting for Typed Markup Language (TML)",
+  "version": "0.0.1",
+  "publisher": "tml",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fponticelli/tml.git"
+  },
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:tml"
+  ],
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "tml",
+        "aliases": [
+          "Typed Markup Language",
+          "TML"
+        ],
+        "extensions": [
+          ".tml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "tml",
+        "scopeName": "source.tml",
+        "path": "./syntaxes/tml.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build": "vsce package --no-dependencies",
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "@types/vscode": "1.99.1",
+    "@vscode/vsce": "3.3.2",
+    "typescript": "5.8.3"
+  }
+}

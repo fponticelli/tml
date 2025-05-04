@@ -1,0 +1,173 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Typed Markup Language",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#blocks" },
+    { "include": "#attributes" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#booleans" },
+    { "include": "#arrays" },
+    { "include": "#objects" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.tml",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.tml",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "blocks": {
+      "patterns": [
+        {
+          "match": "^(\\s*)([a-zA-Z0-9$_-]+)(?=\\s|:|$)",
+          "captures": {
+            "2": { "name": "entity.name.tag.tml" }
+          }
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "match": "\\b([a-zA-Z0-9_-]+)(=)",
+          "captures": {
+            "1": { "name": "entity.other.attribute-name.tml" },
+            "2": { "name": "keyword.operator.assignment.tml" }
+          }
+        },
+        {
+          "match": "\\b([a-zA-Z0-9_-]+)(!)",
+          "captures": {
+            "1": { "name": "entity.other.attribute-name.tml" },
+            "2": { "name": "keyword.operator.assignment.tml" }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.tml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.tml",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.tml",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.tml",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "match": ":\\s*([^\\s{\\[\"'][^\\s]*|[^\\s{\\[\"'].+?)(?=$|\\s+//)",
+          "captures": {
+            "1": { "name": "string.unquoted.tml" }
+          }
+        },
+        {
+          "match": "=\\s*([^\\s{\\[\"'][^\\s]*|[^\\s{\\[\"'].+?)(?=$|\\s+//)",
+          "captures": {
+            "1": { "name": "string.unquoted.tml" }
+          }
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.tml",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.tml",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "arrays": {
+      "name": "meta.structure.array.tml",
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.array.begin.tml" }
+      },
+      "end": "\\]",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.array.end.tml" }
+      },
+      "patterns": [
+        { "include": "#strings" },
+        { "include": "#numbers" },
+        { "include": "#booleans" },
+        { "include": "#arrays" },
+        { "include": "#objects" },
+        { "include": "#comments" },
+        {
+          "match": "\\b([a-zA-Z0-9_-]+)\\b",
+          "name": "string.unquoted.tml"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.array.tml"
+        }
+      ]
+    },
+    "objects": {
+      "name": "meta.structure.object.tml",
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.object.begin.tml" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.object.end.tml" }
+      },
+      "patterns": [
+        {
+          "match": "([a-zA-Z0-9_-]+)\\s*(:)",
+          "captures": {
+            "1": { "name": "support.type.property-name.tml" },
+            "2": { "name": "punctuation.separator.key-value.tml" }
+          }
+        },
+        { "include": "#strings" },
+        { "include": "#numbers" },
+        { "include": "#booleans" },
+        { "include": "#arrays" },
+        { "include": "#objects" },
+        { "include": "#comments" },
+        {
+          "match": "\\b([a-zA-Z0-9_-]+)\\b(?!\\s*:)",
+          "name": "string.unquoted.tml"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.object.tml"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.tml"
+}
