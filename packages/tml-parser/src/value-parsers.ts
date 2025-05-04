@@ -72,6 +72,43 @@ export function parseBooleanValue(
 }
 
 /**
+ * Determines if a value should be treated as a string when in a structured context
+ * like an array or object. This is used to identify unquoted strings.
+ */
+export function isUnquotedString(value: string): boolean {
+  const trimmed = value.trim()
+
+  // If it's already quoted, it's not an unquoted string
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return false
+  }
+
+  // If it's a boolean, it's not an unquoted string
+  if (trimmed === 'true' || trimmed === 'false') {
+    return false
+  }
+
+  // If it's a number, it's not an unquoted string
+  if (!isNaN(Number(trimmed)) && trimmed !== '') {
+    return false
+  }
+
+  // If it's an object or array, it's not an unquoted string
+  if (
+    (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+    (trimmed.startsWith('[') && trimmed.endsWith(']'))
+  ) {
+    return false
+  }
+
+  // Otherwise, it's an unquoted string
+  return true
+}
+
+/**
  * Determines the type of a value and parses it accordingly.
  */
 export function parseValue(value: string, position?: Position): Value {
@@ -130,6 +167,40 @@ export function parseObjectValue(
         .trim()
     } else {
       content = lines.join(' ').trim()
+    }
+  }
+
+  // Helper function to process a value for object fields
+  const processFieldValue = (key: string, value: string) => {
+    if (!key) return
+
+    const trimmedValue = value.trim()
+
+    // Check if it's a nested array or object
+    if (trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) {
+      // It's a nested array
+      fields.push({
+        type: 'Field',
+        key,
+        value: parseArrayValue(trimmedValue, position),
+        position,
+      })
+    } else if (trimmedValue.startsWith('{') && trimmedValue.endsWith('}')) {
+      // It's a nested object
+      fields.push({
+        type: 'Field',
+        key,
+        value: parseObjectValue(trimmedValue, position),
+        position,
+      })
+    } else {
+      // It's a regular value
+      fields.push({
+        type: 'Field',
+        key,
+        value: parseValue(trimmedValue, position),
+        position,
+      })
     }
   }
 
@@ -239,13 +310,7 @@ export function parseObjectValue(
       // Handle value separator
       if (char === ',' && inQuote === null && inObject === 0 && inArray === 0) {
         if (currentKey) {
-          currentValue = currentValue.trim()
-          fields.push({
-            type: 'Field',
-            key: currentKey,
-            value: parseValue(currentValue, position),
-            position,
-          })
+          processFieldValue(currentKey.trim(), currentValue)
         }
         currentKey = ''
         currentValue = ''
@@ -259,6 +324,12 @@ export function parseObjectValue(
       } else {
         currentValue += char
       }
+    }
+
+    // Process the last field if there's any remaining key/value
+    // This handles the case where the object doesn't end with a comma
+    if (currentKey && !collectingKey) {
+      processFieldValue(currentKey.trim(), currentValue)
     }
   }
 
@@ -298,6 +369,37 @@ export function parseArrayValue(
         .trim()
     } else {
       content = lines.join(' ').trim()
+    }
+  }
+
+  // Helper function to process a value and add it to elements
+  const processValue = (value: string) => {
+    if (!value.trim()) return
+
+    const trimmedValue = value.trim()
+
+    // Check if it's a nested array or object
+    if (trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) {
+      // It's a nested array
+      elements.push({
+        type: 'Element',
+        value: parseArrayValue(trimmedValue, position),
+        position,
+      })
+    } else if (trimmedValue.startsWith('{') && trimmedValue.endsWith('}')) {
+      // It's a nested object
+      elements.push({
+        type: 'Element',
+        value: parseObjectValue(trimmedValue, position),
+        position,
+      })
+    } else {
+      // It's a regular value
+      elements.push({
+        type: 'Element',
+        value: parseValue(trimmedValue, position),
+        position,
+      })
     }
   }
 
@@ -391,19 +493,19 @@ export function parseArrayValue(
 
       // Handle element separator
       if (char === ',' && inQuote === null && inObject === 0 && inArray === 0) {
-        if (currentValue.trim()) {
-          elements.push({
-            type: 'Element',
-            value: parseValue(currentValue.trim(), position),
-            position,
-          })
-        }
+        processValue(currentValue)
         currentValue = ''
         continue
       }
 
       // Collect characters
       currentValue += char
+    }
+
+    // Process the last element if there's any remaining value
+    // This handles the case where the array doesn't end with a comma
+    if (currentValue.trim()) {
+      processValue(currentValue)
     }
   }
 

@@ -56,6 +56,7 @@ section id=about class=main
   - **Strings**: Quoted with `'` or `"`. Escapes allowed with backslashes.
   - **Objects**: JSON-like syntax (e.g. `{ key: "value" }`)
   - **Arrays**: Square-bracketed values, optionally nested (e.g. `[1, true, "text"]`)
+    - In arrays, string values can be unquoted if they don't contain special characters (e.g. `[value1, value2, 3]` is equivalent to `["value1", "value2", 3]`)
 
 - Structured values (objects, arrays, quoted strings) may begin inline but span multiple lines, as long as braces/brackets are balanced and indentation is consistent.
 
@@ -79,6 +80,14 @@ This is parsed as a single attribute with a multiline object value.
 
 ```tml
 options={ verbose: true, retries: 3, tags: ["a", "b", "c"] }
+```
+
+- In arrays, string values can be unquoted for more concise syntax:
+
+```tml
+// These are equivalent:
+tags: [item1, item2, item3]
+tags: ["item1", "item2", "item3"]
 ```
 
 ### 1.4 Values
