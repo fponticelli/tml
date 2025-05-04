@@ -43,19 +43,23 @@ function isPositionInRange(
 }
 
 /**
- * Finds the node at the given position in the document
+ * Recursively finds the most specific node at the given position
  */
 function findNodeAtPosition(
   nodes: Node[],
   position: vscode.Position
 ): Node | undefined {
-  for (const node of nodes) {
+  // Process nodes in reverse order to prioritize later nodes (which might be more specific)
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const node = nodes[i]
+
     if (isPositionInRange(position, node.position)) {
-      // For block nodes, check children recursively
+      // For block nodes, check children first
       if (node.type === 'Block') {
         const blockNode = node as BlockNode
         const childNode = findNodeAtPosition(blockNode.children, position)
         if (childNode) {
+          // If we found a child node, return it immediately
           return childNode
         }
       }
@@ -88,6 +92,14 @@ function findNodeAtPosition(
         }
       }
 
+      // For comment nodes, check the position
+      if (node.type === 'Comment') {
+        if (node.position && isPositionInRange(position, node.position)) {
+          return node
+        }
+      }
+
+      // If we didn't find a more specific node, return this one
       return node
     }
   }
@@ -130,6 +142,9 @@ function getHoverInfo(
 ): vscode.MarkdownString | undefined {
   const markdown = new vscode.MarkdownString()
 
+  // Find parent information for all node types
+  const parent = findParentBlock(allNodes, node)
+
   switch (node.type) {
     case 'Block': {
       const blockNode = node as BlockNode
@@ -138,6 +153,11 @@ function getHoverInfo(
       // Add number of children
       if (blockNode.children.length > 0) {
         markdown.appendMarkdown(`Children: ${blockNode.children.length}\n\n`)
+      }
+
+      // Add parent information
+      if (parent) {
+        markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
       }
 
       return markdown
@@ -155,7 +175,6 @@ function getHoverInfo(
       }
 
       // Add parent information
-      const parent = findParentBlock(allNodes, node)
       if (parent) {
         markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
       }
@@ -175,7 +194,6 @@ function getHoverInfo(
       }
 
       // Add parent information
-      const parent = findParentBlock(allNodes, node)
       if (parent) {
         markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
       }
@@ -185,6 +203,12 @@ function getHoverInfo(
 
     case 'Comment': {
       markdown.appendMarkdown(`**Comment**\n\n`)
+
+      // Add parent information
+      if (parent) {
+        markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
+      }
+
       return markdown
     }
 
@@ -197,32 +221,89 @@ function getHoverInfo(
  * TML Hover Provider implementation
  */
 export class TMLHoverProvider implements vscode.HoverProvider {
+  private outputChannel: vscode.OutputChannel
+  private errorChannel: vscode.OutputChannel
+
+  // Cache for parsed documents
+  private lastDocumentUri: string = ''
+  private lastDocumentVersion: number = -1
+  private lastDocumentText: string = ''
+  private cachedNodes: Node[] = []
+
+  constructor() {
+    // Create output channels once when the provider is instantiated
+    this.outputChannel = vscode.window.createOutputChannel('TML Hover')
+    this.errorChannel = vscode.window.createOutputChannel('TML Hover Error')
+  }
+
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
+    // eslint-disable-next-line no-unused-vars
     _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
     try {
-      // Log to output channel
-      const outputChannel = vscode.window.createOutputChannel('TML Hover')
-      outputChannel.appendLine(
+      // Use the existing output channel
+      this.outputChannel.clear()
+      this.outputChannel.appendLine(
         `Hover requested at position: ${position.line}:${position.character}`
       )
-      outputChannel.appendLine(`Document language ID: ${document.languageId}`)
+      this.outputChannel.appendLine(
+        `Document language ID: ${document.languageId}`
+      )
 
-      // Parse the document
+      // Get document text
       const text = document.getText()
-      const nodes = parseTML(text)
+      let nodes: Node[]
+
+      // Check if we need to parse the document or can use cached nodes
+      const documentUri = document.uri.toString()
+      const documentVersion = document.version
+
+      if (
+        documentUri === this.lastDocumentUri &&
+        documentVersion === this.lastDocumentVersion &&
+        text === this.lastDocumentText &&
+        this.cachedNodes.length > 0
+      ) {
+        // Use cached nodes
+        nodes = this.cachedNodes
+        this.outputChannel.appendLine(
+          `Using cached nodes (${nodes.length} root nodes)`
+        )
+      } else {
+        // Parse the document and update cache
+        nodes = parseTML(text)
+        this.lastDocumentUri = documentUri
+        this.lastDocumentVersion = documentVersion
+        this.lastDocumentText = text
+        this.cachedNodes = nodes
+        this.outputChannel.appendLine(
+          `Parsed ${nodes.length} root nodes (cached)`
+        )
+      }
 
       // Find the node at the position
       const node = findNodeAtPosition(nodes, position)
       if (!node) {
+        this.outputChannel.appendLine('No node found at position')
         return null
+      }
+
+      // Log node information
+      this.outputChannel.appendLine(`Found node of type: ${node.type}`)
+      if (node.type === 'Block') {
+        this.outputChannel.appendLine(`Block name: ${(node as BlockNode).name}`)
+      } else if (node.type === 'Attribute') {
+        this.outputChannel.appendLine(
+          `Attribute key: ${(node as Attribute).key}`
+        )
       }
 
       // Get hover information
       const hoverInfo = getHoverInfo(node, document, nodes)
       if (!hoverInfo) {
+        this.outputChannel.appendLine('No hover information available')
         return null
       }
 
@@ -230,11 +311,16 @@ export class TMLHoverProvider implements vscode.HoverProvider {
       const range = node.position
         ? tmlPositionToVSCodeRange(node.position)
         : undefined
+
+      this.outputChannel.appendLine('Hover information created successfully')
       return new vscode.Hover(hoverInfo, range)
     } catch (error) {
-      // Log error to output channel
-      const outputChannel = vscode.window.createOutputChannel('TML Hover Error')
-      outputChannel.appendLine(`Error in hover provider: ${error}`)
+      // Use the existing error channel
+      this.errorChannel.clear()
+      this.errorChannel.appendLine(`Error in hover provider: ${error}`)
+      if (error instanceof Error) {
+        this.errorChannel.appendLine(error.stack || 'No stack trace available')
+      }
       return null
     }
   }

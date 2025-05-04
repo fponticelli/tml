@@ -10,10 +10,8 @@ html lang=en
     h1: Welcome to TML
     p: A concise and typed markup language.
     img src=logo.png alt='Site Logo'
-    
     // Boolean shortcut
     button disabled!
-    
     // Structured values
     config={
       server: "api.example.com",
@@ -23,20 +21,15 @@ html lang=en
         "auto-retry"
       ]
     }
-    
     // Arrays with unquoted strings
     tags: [item1, item2, item3]
-    
     // Special blocks
     $ref path="./components/button.tml" id=myButton
-    
     // Multiline value
     description:
       This is a multiline string
       that spans several lines
       and is parsed as one value
-    
     /* This is a block comment
        that spans multiple lines */
-    
     : This is a standalone value
