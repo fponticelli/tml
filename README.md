@@ -42,16 +42,16 @@ This monorepo uses [Turborepo](https://turbo.build/repo) for managing the build 
 
 ```bash
 # Install dependencies
-pnpm install
+yarn install
 
 # Build all packages
-pnpm build
+yarn build
 
 # Run tests
-pnpm test
+yarn test
 
 # Development mode
-pnpm dev
+yarn dev
 ```
 
 ## License

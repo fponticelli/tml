@@ -1,9 +1,9 @@
 # Run linting, formatting, and tests before committing
 echo "Running lint checks..."
-pnpm lint
+yarn lint
 
 echo "Running format checks..."
-pnpm format
+yarn format
 
 echo "Running tests..."
-pnpm test
+yarn test

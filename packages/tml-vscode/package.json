@@ -42,18 +42,18 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "yarn compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "build": "npx @vscode/vsce package",
     "test": "echo \"No tests yet\""
   },
   "vsce": {
-    "dependencies": false,
-    "yarn": false
+    "dependencies": true,
+    "yarn": true
   },
   "dependencies": {
-    "@tml/parser": "workspace:*"
+    "@tml/parser": "*"
   },
   "devDependencies": {
     "@types/node": "22.15.3",
