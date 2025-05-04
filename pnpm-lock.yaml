@@ -88,6 +88,10 @@ importers:
         version: 3.1.2(@types/node@22.15.3)(jiti@2.4.2)(yaml@2.7.1)
 
   packages/tml-vscode:
+    dependencies:
+      '@tml/parser':
+        specifier: workspace:*
+        version: link:../tml-parser
     devDependencies:
       '@types/node':
         specifier: 22.15.3

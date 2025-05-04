@@ -45,8 +45,15 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "build": "vsce package --no-dependencies",
+    "build": "npx @vscode/vsce package",
     "test": "echo \"No tests yet\""
+  },
+  "vsce": {
+    "dependencies": false,
+    "yarn": false
+  },
+  "dependencies": {
+    "@tml/parser": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.15.3",
