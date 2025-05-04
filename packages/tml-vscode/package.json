@@ -56,7 +56,8 @@
     "bundleLocalDependencies": true
   },
   "dependencies": {
-    "@tml/parser": "*"
+    "@tml/parser": "*",
+    "@tml/utils": "*"
   },
   "devDependencies": {
     "@types/node": "22.15.3",

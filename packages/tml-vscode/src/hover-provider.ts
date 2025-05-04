@@ -8,9 +8,10 @@ import {
   Position,
   Point,
 } from '@tml/parser'
-
-// Type for nodes with additional value type information
-type NodeWithValueType = Node & { valueType?: string }
+import {
+  findNodeAtPosition as findNodeAtPositionUtil,
+  findParentBlock,
+} from '@tml/utils'
 
 /**
  * Converts a TML Point to a VSCode Position
@@ -30,106 +31,16 @@ function tmlPositionToVSCodeRange(position: Position): vscode.Range {
 }
 
 /**
- * Checks if a VSCode position is within a TML position range
- */
-function isPositionInRange(
-  position: vscode.Position,
-  tmlPosition?: Position
-): boolean {
-  if (!tmlPosition) return false
-
-  const range = tmlPositionToVSCodeRange(tmlPosition)
-  return range.contains(position)
-}
-
-/**
- * Recursively finds the most specific node at the given position
+ * Adapter function to use the findNodeAtPosition utility with VSCode positions
  */
 function findNodeAtPosition(
   nodes: Node[],
   position: vscode.Position
 ): Node | undefined {
-  // Process nodes in reverse order to prioritize later nodes (which might be more specific)
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const node = nodes[i]
-
-    if (isPositionInRange(position, node.position)) {
-      // For block nodes, check children first
-      if (node.type === 'Block') {
-        const blockNode = node as BlockNode
-        const childNode = findNodeAtPosition(blockNode.children, position)
-        if (childNode) {
-          // If we found a child node, return it immediately
-          return childNode
-        }
-      }
-
-      // For value nodes, check the contained value
-      if (node.type === 'Value') {
-        const valueNode = node as ValueNode
-        if (
-          valueNode.value.position &&
-          isPositionInRange(position, valueNode.value.position)
-        ) {
-          // Create a new object with the value type information
-          const result = Object.assign({}, node) as NodeWithValueType
-          result.valueType = valueNode.value.type
-          return result
-        }
-      }
-
-      // For attribute nodes, check the value
-      if (node.type === 'Attribute') {
-        const attrNode = node as Attribute
-        if (
-          attrNode.value.position &&
-          isPositionInRange(position, attrNode.value.position)
-        ) {
-          // Create a new object with the value type information
-          const result = Object.assign({}, node) as NodeWithValueType
-          result.valueType = attrNode.value.type
-          return result
-        }
-      }
-
-      // For comment nodes, check the position
-      if (node.type === 'Comment') {
-        if (node.position && isPositionInRange(position, node.position)) {
-          return node
-        }
-      }
-
-      // If we didn't find a more specific node, return this one
-      return node
-    }
-  }
-
-  return undefined
-}
-
-/**
- * Finds the parent block of a node
- */
-function findParentBlock(
-  nodes: Node[],
-  targetNode: Node,
-  currentParent?: BlockNode
-): BlockNode | undefined {
-  for (const node of nodes) {
-    if (node === targetNode) {
-      return currentParent
-    }
-
-    if (node.type === 'Block') {
-      const blockNode = node as BlockNode
-      const parent = findParentBlock(blockNode.children, targetNode, blockNode)
-      if (parent) {
-        return parent
-      }
-    }
-  }
-
-  return undefined
+  return findNodeAtPositionUtil(nodes, {
+    line: position.line + 1, // Convert from 0-based to 1-based
+    column: position.character,
+  })
 }
 
 /**
