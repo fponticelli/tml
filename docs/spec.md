@@ -55,6 +55,7 @@ section id=about class=main
   - **Numbers**: Integer and decimal numbers (`42`, `3.14`)
   - **Strings**: Quoted with `'` or `"`. Escapes allowed with backslashes.
   - **Objects**: JSON-like syntax (e.g. `{ key: "value" }`)
+    - In objects, string values can be unquoted if they don't contain special characters (e.g. `{ name: MyApp }` is equivalent to `{ name: "MyApp" }`)
   - **Arrays**: Square-bracketed values, optionally nested (e.g. `[1, true, "text"]`)
     - In arrays, string values can be unquoted if they don't contain special characters (e.g. `[value1, value2, 3]` is equivalent to `["value1", "value2", 3]`)
 
@@ -82,12 +83,16 @@ This is parsed as a single attribute with a multiline object value.
 options={ verbose: true, retries: 3, tags: ["a", "b", "c"] }
 ```
 
-- In arrays, string values can be unquoted for more concise syntax:
+- In arrays and objects, string values can be unquoted for more concise syntax:
 
 ```tml
-// These are equivalent:
+// These arrays are equivalent:
 tags: [item1, item2, item3]
 tags: ["item1", "item2", "item3"]
+
+// These objects are equivalent:
+config: { name: MyApp, version: 1.0 }
+config: { name: "MyApp", version: 1.0 }
 ```
 
 ### 1.4 Values
