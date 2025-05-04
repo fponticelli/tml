@@ -82,7 +82,7 @@ and should be joined together
     const result = parseTMLValue(input)
     expect(result.type).toBe('String')
     expect((result as StringValue).value).toBe(
-      'This is a multiline value that spans several lines and should be joined together'
+      'This is a multiline value\nthat spans several lines\nand should be joined together'
     )
   })
 
@@ -257,6 +257,35 @@ strings
         expect(value).toContain('that spans several lines')
         expect(value).toContain('and is parsed as one value')
       }
+    }
+  })
+
+  it('should preserve newlines in multiline string values', () => {
+    // Test case for multiline string with preserved newlines
+    const input = `description:
+  This is a multiline string
+  that spans several lines
+  and is parsed as one value`
+
+    const result = parseTML(input)
+    expect(result.length).toBe(1)
+
+    const description = assertBlockNode(result[0], 'description')
+
+    // Find the value node
+    const valueNode = description.children.find(
+      (child: Node) => child.type === 'Value'
+    ) as ValueNode
+    expect(valueNode).toBeDefined()
+
+    if (valueNode) {
+      expect(valueNode.value.type).toBe('String')
+      const value = (valueNode.value as StringValue).value
+
+      // Check that the string has the exact expected value with newlines
+      expect(value).toBe(
+        'This is a multiline string\nthat spans several lines\nand is parsed as one value'
+      )
     }
   })
 })

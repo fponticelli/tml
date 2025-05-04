@@ -47,7 +47,8 @@
     "watch": "vite build --watch --mode development",
     "prepare-package": "node ./scripts/prepare-package.js",
     "build": "yarn prepare-package && yarn build:prod && npx @vscode/vsce package",
-    "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\"",
+    "extension:install": "code --uninstall-extension tml.tml-vscode & code --install-extension tml-vscode-0.0.1.vsix"
   },
   "vsce": {
     "dependencies": true,

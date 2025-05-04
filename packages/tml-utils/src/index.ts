@@ -8,3 +8,6 @@ export {
   type PositionLike,
   type RangeLike,
 } from '@/find-nodes'
+
+// Export stringify functions
+export { stringifyTML, type StringifyOptions } from '@/stringify'

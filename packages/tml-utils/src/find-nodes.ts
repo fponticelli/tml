@@ -41,6 +41,12 @@ export function isPositionInRange(
 
 /**
  * Recursively finds the most specific node at the given position
+ *
+ * Note: Currently this function has limitations with finding nodes on lines
+ * other than the first line of the document. It primarily works for finding
+ * nodes on the same line as their parent block's start position.
+ *
+ * TODO: Improve position tracking to better handle multiline documents and nested nodes.
  */
 export function findNodeAtPosition(
   nodes: Node[],

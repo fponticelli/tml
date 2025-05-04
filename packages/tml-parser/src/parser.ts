@@ -72,6 +72,13 @@ export function parseTML(input: string): Node[] {
     lines: string[]
   } | null = null
 
+  // Track multiline block comment collection
+  let collectingBlockComment: {
+    startLine: number
+    startIndent: number
+    lines: string[]
+  } | null = null
+
   // Process each line
   for (let i = 0; i < lines.length; i++) {
     const lineNumber = i + 1
@@ -80,6 +87,120 @@ export function parseTML(input: string): Node[] {
 
     // Skip empty lines
     if (indent === -1) {
+      if (collectingBlockComment) {
+        collectingBlockComment.lines.push('')
+      }
+      continue
+    }
+
+    // Check if we're collecting a multiline block comment
+    if (collectingBlockComment) {
+      collectingBlockComment.lines.push(line)
+
+      // Check if this line contains the end of the block comment
+      if (line.includes('*/')) {
+        // We've reached the end of the block comment, process it
+        const commentText = collectingBlockComment.lines.join('\n')
+
+        // Extract the content between /* and */
+        const startIndex = commentText.indexOf('/*') + 2
+        const endIndex = commentText.lastIndexOf('*/')
+        const content = commentText.substring(startIndex, endIndex).trim()
+
+        const commentNode: Node = {
+          type: 'Comment',
+          value: content,
+          isLineComment: false,
+          position: createPosition(
+            collectingBlockComment.startLine,
+            collectingBlockComment.startIndent,
+            lineNumber,
+            indent + line.indexOf('*/') + 2
+          ),
+        }
+
+        // Add the comment to the appropriate parent
+        if (stack.length === 0) {
+          root.push(commentNode)
+        } else {
+          stack[stack.length - 1].node.children.push(commentNode)
+        }
+
+        // Check if there's content after the comment end
+        const commentEndIndex = line.indexOf('*/') + 2
+        if (commentEndIndex < line.length) {
+          // Process the rest of the line
+          const afterComment = line.substring(commentEndIndex).trim()
+          if (afterComment) {
+            // Parse the content after the comment
+            const { node } = parseLine(afterComment, lineNumber)
+
+            if (node) {
+              // Add the node to the appropriate parent
+              if (stack.length === 0) {
+                root.push(node)
+              } else {
+                stack[stack.length - 1].node.children.push(node)
+              }
+
+              // Push block nodes to the stack for potential children
+              if (node.type === 'Block') {
+                stack.push({ indent, node })
+              }
+            }
+          }
+        }
+
+        collectingBlockComment = null
+        continue
+      }
+
+      // Continue collecting the block comment
+      continue
+    }
+
+    // Check if this line contains the start of a multiline block comment
+    const blockCommentStart = line.indexOf('/*')
+    if (
+      blockCommentStart !== -1 &&
+      !line.includes('*/', blockCommentStart + 2)
+    ) {
+      // Extract the content before the comment start
+      const beforeComment = line.substring(0, blockCommentStart).trim()
+
+      // Start collecting a multiline block comment
+      collectingBlockComment = {
+        startLine: lineNumber,
+        startIndent: indent,
+        lines: [line],
+      }
+
+      // If there's content before the comment, process it first
+      if (beforeComment) {
+        // Parse the line up to the comment start
+        const { node } = parseLine(beforeComment, lineNumber)
+
+        if (node) {
+          // Handle indentation to build the hierarchy
+          while (stack.length > 0 && indent <= stack[stack.length - 1].indent) {
+            stack.pop()
+          }
+
+          if (stack.length === 0) {
+            // Add to root if there's no parent
+            root.push(node)
+          } else {
+            // Add to parent's children
+            stack[stack.length - 1].node.children.push(node)
+          }
+
+          // Push block nodes to the stack for potential children
+          if (node.type === 'Block') {
+            stack.push({ indent, node })
+          }
+        }
+      }
+
       continue
     }
 
@@ -190,6 +311,36 @@ export function parseTML(input: string): Node[] {
     collectingValue.blockNode.children.push(valueNode)
   }
 
+  // Process any remaining multiline block comment
+  if (collectingBlockComment) {
+    // This is an unclosed block comment, but we'll try to handle it gracefully
+    const commentText = collectingBlockComment.lines.join('\n')
+
+    // Extract the content after /*
+    const startIndex = commentText.indexOf('/*') + 2
+    const content = commentText.substring(startIndex).trim()
+
+    const commentNode: Node = {
+      type: 'Comment',
+      value: content,
+      isLineComment: false,
+      position: createPosition(
+        collectingBlockComment.startLine,
+        collectingBlockComment.startIndent,
+        lines.length,
+        collectingBlockComment.lines[collectingBlockComment.lines.length - 1]
+          .length
+      ),
+    }
+
+    // Add the comment to the appropriate parent
+    if (stack.length === 0) {
+      root.push(commentNode)
+    } else {
+      stack[stack.length - 1].node.children.push(commentNode)
+    }
+  }
+
   return root
 }
 
@@ -236,10 +387,10 @@ export function parseTMLValue(input: string): Value {
         return line.substring(Math.min(minIndent, line.length))
       })
 
-      // Join with spaces as per the spec
+      // Join with newlines to preserve multiline format
       const processed = processedLines
         .filter(line => line.length > 0)
-        .join(' ')
+        .join('\n')
         .trim()
 
       return {
@@ -249,11 +400,11 @@ export function parseTMLValue(input: string): Value {
     }
   }
 
-  // Standard behavior - join with spaces
+  // Standard behavior - join with newlines for consistency
   const trimmedLines = lines
     .map(line => line.trim())
     .filter(line => line.length > 0)
-  const joined = trimmedLines.join(' ')
+  const joined = trimmedLines.join('\n')
 
   return parseValue(joined)
 }
