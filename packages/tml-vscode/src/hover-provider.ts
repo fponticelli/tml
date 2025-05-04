@@ -7,6 +7,7 @@ import {
   Attribute,
   Position,
   Point,
+  CommentNode,
 } from '@tml/parser'
 import {
   findNodeAtPosition as findNodeAtPositionUtil,
@@ -59,16 +60,30 @@ function getHoverInfo(
   switch (node.type) {
     case 'Block': {
       const blockNode = node as BlockNode
-      markdown.appendMarkdown(`**Block**: \`${blockNode.name}\`\n\n`)
+      markdown.appendMarkdown(`**Block**: \`${blockNode.name}\``)
+
+      const counts = blockNode.children.reduce(
+        (acc, child) => {
+          acc[child.type] = (acc[child.type] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      )
 
       // Add number of children
       if (blockNode.children.length > 0) {
-        markdown.appendMarkdown(`Children: ${blockNode.children.length}\n\n`)
+        markdown.appendMarkdown(`\n\nchildren: `)
+        for (const [type, count] of Object.entries(counts)) {
+          if (count === 0) continue
+          markdown.appendMarkdown(
+            `\n- ${count} ${type.toLocaleLowerCase()}${count > 1 ? 's' : ''}`
+          )
+        }
       }
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown
@@ -76,18 +91,18 @@ function getHoverInfo(
 
     case 'Value': {
       const valueNode = node as ValueNode & { valueType?: string }
-      markdown.appendMarkdown(`**Value Node**\n\n`)
+      markdown.appendMarkdown(`**Value:**`)
 
       // Add value type information
       if (valueNode.valueType) {
-        markdown.appendMarkdown(`Type: \`${valueNode.valueType}\`\n\n`)
+        markdown.appendMarkdown(` \`${valueNode.valueType}\``)
       } else {
-        markdown.appendMarkdown(`Type: \`${valueNode.value.type}\`\n\n`)
+        markdown.appendMarkdown(` \`${valueNode.value.type}\``)
       }
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown
@@ -95,29 +110,29 @@ function getHoverInfo(
 
     case 'Attribute': {
       const attrNode = node as Attribute & { valueType?: string }
-      markdown.appendMarkdown(`**Attribute**: \`${attrNode.key}\`\n\n`)
+      markdown.appendMarkdown(`**Attribute**: \`${attrNode.key}\``)
 
       // Add value type information
       if (attrNode.valueType) {
-        markdown.appendMarkdown(`Value Type: \`${attrNode.valueType}\`\n\n`)
+        markdown.appendMarkdown(` \`${attrNode.valueType}\``)
       } else {
-        markdown.appendMarkdown(`Value Type: \`${attrNode.value.type}\`\n\n`)
+        markdown.appendMarkdown(` \`${attrNode.value.type}\``)
       }
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown
     }
 
     case 'Comment': {
-      markdown.appendMarkdown(`**Comment**\n\n`)
+      markdown.appendMarkdown(`**Comment**`)
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`Parent: \`${parent.name}\`\n\n`)
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown

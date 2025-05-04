@@ -1,6 +1,5 @@
 // This is a sample TML file
 $schema: "https://example.com/schema/tml-html/1.0"
-
 html lang=en
   head
     title: My Website
