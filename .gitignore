@@ -3,6 +3,9 @@ node_modules
 .pnp
 .pnp.js
 
+# vsce
+*.vsix
+
 # yarn v4
 .yarn/*
 !.yarn/patches
