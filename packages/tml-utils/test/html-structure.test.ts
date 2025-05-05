@@ -160,7 +160,7 @@ html lang=en
       expect(attrNodes.length).toBe(2) // lang, charset
 
       // Check attribute keys
-      const keys = attrNodes.map(attr => attr.key)
+      const keys = attrNodes.map((attr: Attribute) => attr.key)
       expect(keys).toContain('lang')
       expect(keys).toContain('charset')
     })
@@ -171,7 +171,7 @@ html lang=en
 
       // Check one of the values
       const titleValue = valueNodes.find(
-        node => (node.value as StringValue).value === 'My Website'
+        (node: ValueNode) => (node.value as StringValue).value === 'My Website'
       )
       expect(titleValue).toBeDefined()
     })
@@ -337,8 +337,7 @@ html lang=en
       expect((nodeAtAttr as Attribute).key).toBe('lang')
     })
 
-    // Skip the tests for nested nodes for now
-    it.skip('should find the head block at different positions', () => {
+    it('should find the head block at different positions', () => {
       // head (line 4)
 
       // Start boundary
@@ -356,7 +355,7 @@ html lang=en
       expect((nodeAtMiddle as BlockNode).name).toBe('head')
     })
 
-    it.skip('should find the title block and its value at different positions', () => {
+    it('should find the title block and its value at different positions', () => {
       // title: My Website (line 5)
 
       // Block position
@@ -373,7 +372,7 @@ html lang=en
       expect(nodeAtValue?.type).toBe('Value')
     })
 
-    it.skip('should find the meta block and its attribute at different positions', () => {
+    it('should find the meta block and its attribute at different positions', () => {
       // meta charset=UTF-8 (line 6)
 
       // Block position
@@ -398,7 +397,7 @@ html lang=en
       expect((nodeAtValue as Attribute).key).toBe('charset')
     })
 
-    it.skip('should handle positions at exact boundaries', () => {
+    it('should handle positions at exact boundaries', () => {
       // Test exact start and end positions of nodes
 
       // HTML block exact start
@@ -421,15 +420,15 @@ html lang=en
       expect(nodeAtTitleStart?.type).toBe('Block')
       expect((nodeAtTitleStart as BlockNode).name).toBe('title')
 
-      // Meta block exact end (should still find the node)
+      // Meta block exact end (should still find the attribute node)
       const metaEndPos = {
         line: metaNode.position!.end.line,
         column: metaNode.position!.end.column,
       }
       const nodeAtMetaEnd = findNodeAtPosition(nodes, metaEndPos)
       expect(nodeAtMetaEnd).toBeDefined()
-      expect(nodeAtMetaEnd?.type).toBe('Block')
-      expect((nodeAtMetaEnd as BlockNode).name).toBe('meta')
+      expect(nodeAtMetaEnd?.type).toBe('Attribute')
+      expect((nodeAtMetaEnd as Attribute).key).toBe('charset')
     })
 
     it('should return undefined for positions outside any node', () => {

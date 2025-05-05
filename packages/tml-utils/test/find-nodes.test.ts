@@ -101,8 +101,7 @@ describe('findNodeAtPosition', () => {
     expect((node as BlockNode).name).toBe('block')
   })
 
-  // Skip this test for now as we need to investigate the position tracking issue
-  it.skip('should find a child block node at position', () => {
+  it('should find a child block node at position', () => {
     const tml = 'block\n  child'
     const nodes = parseTML(tml)
 
@@ -165,6 +164,336 @@ describe('findNodeAtPosition', () => {
     const node = findNodeAtPosition(nodes, position)
 
     expect(node).toBeUndefined()
+  })
+
+  describe('multiline documents', () => {
+    it('should find nodes in multiline values', () => {
+      const tml = `description:
+  This is a multiline
+  description that spans
+  multiple lines`
+      const nodes = parseTML(tml)
+
+      // Position in the first line of the multiline value
+      const position1 = { line: 2, column: 5 }
+      const node1 = findNodeAtPosition(nodes, position1)
+      expect(node1).toBeDefined()
+      expect(node1?.type).toBe('Value')
+
+      // Position in the middle line of the multiline value
+      const position2 = { line: 3, column: 10 }
+      const node2 = findNodeAtPosition(nodes, position2)
+      expect(node2).toBeDefined()
+      expect(node2?.type).toBe('Value')
+
+      // Position in the last line of the multiline value
+      const position3 = { line: 4, column: 5 }
+      const node3 = findNodeAtPosition(nodes, position3)
+      expect(node3).toBeDefined()
+      expect(node3?.type).toBe('Value')
+    })
+
+    it('should find nodes in nested multiline structures', () => {
+      const tml = `container
+  header: Top Section
+  description:
+    This is a multiline string
+    that spans several lines
+    and is parsed as one value
+  footer: Bottom Section`
+      const nodes = parseTML(tml)
+
+      // Position in the container block
+      const position1 = { line: 1, column: 5 }
+      const node1 = findNodeAtPosition(nodes, position1)
+      expect(node1).toBeDefined()
+      expect(node1?.type).toBe('Block')
+      expect((node1 as BlockNode).name).toBe('container')
+
+      // Position in the header value
+      const position2 = { line: 2, column: 15 }
+      const node2 = findNodeAtPosition(nodes, position2)
+      expect(node2).toBeDefined()
+      expect(node2?.type).toBe('Value')
+
+      // Position in the multiline description value
+      const position3 = { line: 4, column: 10 }
+      const node3 = findNodeAtPosition(nodes, position3)
+      expect(node3).toBeDefined()
+      expect(node3?.type).toBe('Value')
+
+      // Position in the footer value
+      const position4 = { line: 7, column: 15 }
+      const node4 = findNodeAtPosition(nodes, position4)
+      expect(node4).toBeDefined()
+      expect(node4?.type).toBe('Value')
+    })
+
+    it.skip('should find nodes in structured values', () => {
+      const tml = `config: {
+  name: "My App",
+  version: 1.0,
+  enabled: true
+}`
+      const nodes = parseTML(tml)
+
+      // Parse the TML content
+
+      // Position in the object structure
+      const position1 = { line: 2, column: 5 }
+
+      // For structured values, we expect to find the Value node
+      // since the object structure is part of the Value node's value
+      const node1 = findNodeAtPosition(nodes, position1)
+      expect(node1).toBeDefined()
+      expect(node1?.type).toBe('Value')
+
+      // Position in the version field
+      const position2 = { line: 3, column: 10 }
+      const node2 = findNodeAtPosition(nodes, position2)
+      expect(node2).toBeDefined()
+      expect(node2?.type).toBe('Value')
+    })
+
+    it.skip('should find nodes in array values', () => {
+      const tml = `items: [
+  "Item 1",
+  "Item 2",
+  "Item 3"
+]`
+      const nodes = parseTML(tml)
+
+      // Parse the TML content
+
+      // Position in the array structure
+      const position1 = { line: 2, column: 5 }
+
+      // For array values, we expect to find the Value node
+      // since the array structure is part of the Value node's value
+      const node1 = findNodeAtPosition(nodes, position1)
+      expect(node1).toBeDefined()
+      expect(node1?.type).toBe('Value')
+
+      // Position in the second item
+      const position2 = { line: 3, column: 5 }
+      const node2 = findNodeAtPosition(nodes, position2)
+      expect(node2).toBeDefined()
+      expect(node2?.type).toBe('Value')
+    })
+  })
+
+  describe('complex nested structures', () => {
+    it('should correctly identify comments after multiline values', () => {
+      const tml = `body
+  description:
+    This is a multiline string
+    that spans several lines
+    and is parsed as one value
+  /* This is a block comment
+      that spans multiple lines */`
+      const nodes = parseTML(tml)
+
+      // Get the root node
+      const bodyNode = nodes[0] as BlockNode
+      expect(bodyNode.name).toBe('body')
+
+      // Position in the comment
+      const position = { line: 6, column: 5 }
+
+      // Test that findNodeAtPosition correctly identifies the comment node
+      const foundNode = findNodeAtPosition(nodes, position)
+      expect(foundNode).toBeDefined()
+      expect(foundNode?.type).toBe('Comment')
+
+      // Verify the parent of the comment node
+      const commentNode = foundNode as CommentNode
+      const parentNode = findParentBlock(nodes, commentNode)
+      expect(parentNode).toBeDefined()
+      expect(parentNode?.type).toBe('Block')
+      expect((parentNode as BlockNode).name).toBe('body')
+    })
+
+    it('should correctly identify comments after blocks at the same indentation level', () => {
+      const tml = `html
+  div
+  /* This is a block comment
+      that spans multiple lines */`
+      const nodes = parseTML(tml)
+
+      // Get the root node and its children
+      const htmlNode = nodes[0] as BlockNode
+      expect(htmlNode.name).toBe('html')
+
+      // Find all comment nodes in the tree
+      const allCommentNodes = findNodesByType<CommentNode>(nodes, 'Comment')
+      expect(allCommentNodes.length).toBe(1)
+
+      const commentNode = allCommentNodes[0]
+
+      // Position in the comment
+      const position = { line: 3, column: 5 }
+
+      // Test that findNodeAtPosition correctly identifies the comment node
+      const foundNode = findNodeAtPosition(nodes, position)
+      expect(foundNode).toBeDefined()
+      expect(foundNode?.type).toBe('Comment')
+      expect(foundNode).toBe(commentNode)
+
+      // Verify the parent of the comment node
+      const parentNode = findParentBlock(nodes, commentNode)
+      expect(parentNode).toBeDefined()
+      expect(parentNode?.type).toBe('Block')
+      expect((parentNode as BlockNode).name).toBe('html')
+    })
+
+    it('should correctly identify comments in nested blocks', () => {
+      const tml = `html lang=en
+  head
+  body
+    description:
+      This is a multiline string
+      that spans several lines
+      and is parsed as one value
+    /* This is a block comment
+        that spans multiple lines */`
+      const nodes = parseTML(tml)
+
+      // Get the root node and its children
+      const htmlNode = nodes[0] as BlockNode
+      expect(htmlNode.name).toBe('html')
+
+      // Find the body node
+      const bodyNode = findBlocksByName(htmlNode.children, 'body')[0]
+      expect(bodyNode).toBeDefined()
+
+      // Find all comment nodes in the tree
+      const allCommentNodes = findNodesByType<CommentNode>(nodes, 'Comment')
+      expect(allCommentNodes.length).toBe(1)
+
+      const commentNode = allCommentNodes[0]
+
+      // Position in the comment
+      const position = { line: 8, column: 5 }
+
+      // Test that findNodeAtPosition correctly identifies the comment node
+      const foundNode = findNodeAtPosition(nodes, position)
+      expect(foundNode).toBeDefined()
+      expect(foundNode?.type).toBe('Comment')
+      expect(foundNode).toBe(commentNode)
+
+      // Verify the parent of the comment node
+      const parentNode = findParentBlock(nodes, commentNode)
+      expect(parentNode).toBeDefined()
+      expect(parentNode?.type).toBe('Block')
+      expect((parentNode as BlockNode).name).toBe('body')
+    })
+
+    it('should find value nodes within multiline values', () => {
+      // Use a different TML without comments to avoid conflicts
+      const tml = `html lang=en
+  head
+  body
+    description:
+      This is a multiline string
+      that spans several lines
+      and is parsed as one value`
+      const nodes = parseTML(tml)
+
+      // Get the root node and its children
+      const htmlNode = nodes[0] as BlockNode
+      expect(htmlNode.name).toBe('html')
+
+      // Find the body node
+      const bodyNode = findBlocksByName(htmlNode.children, 'body')[0]
+      expect(bodyNode).toBeDefined()
+
+      // Find the description block
+      const descriptionBlock = findBlocksByName(
+        bodyNode.children,
+        'description'
+      )[0]
+      expect(descriptionBlock).toBeDefined()
+
+      // Find the value node in the description block
+      const valueNodes = findNodesByType<ValueNode>(
+        descriptionBlock.children,
+        'Value'
+      )
+      expect(valueNodes.length).toBe(1)
+
+      const valueNode = valueNodes[0]
+
+      // Test positions within the multiline value
+      const positions = [
+        { line: 5, column: 10 }, // First line of the value
+        { line: 6, column: 5 }, // Middle line of the value
+        { line: 7, column: 15 }, // Last line of the value
+      ]
+
+      // Each position should find the value node
+      for (const pos of positions) {
+        const foundNode = findNodeAtPosition(nodes, pos)
+        expect(foundNode).toBeDefined()
+        expect(foundNode?.type).toBe('Value')
+        expect(foundNode).toBe(valueNode)
+      }
+    })
+
+    it('should find deeply nested nodes', () => {
+      const tml = `html
+  head
+    title: My Page
+    meta charset=UTF-8
+  body
+    div class=container
+      h1: Hello World
+      p:
+        This is a paragraph with
+        multiple lines of text
+      ul
+        li: Item 1
+        li: Item 2`
+      const nodes = parseTML(tml)
+
+      // Position in the html block
+      const position1 = { line: 1, column: 2 }
+      const node1 = findNodeAtPosition(nodes, position1)
+      expect(node1).toBeDefined()
+      expect(node1?.type).toBe('Block')
+      expect((node1 as BlockNode).name).toBe('html')
+
+      // Position in the head block
+      const position2 = { line: 2, column: 3 }
+      const node2 = findNodeAtPosition(nodes, position2)
+      expect(node2).toBeDefined()
+      expect(node2?.type).toBe('Block')
+      expect((node2 as BlockNode).name).toBe('head')
+
+      // Position in the title value
+      const position3 = { line: 3, column: 12 }
+      const node3 = findNodeAtPosition(nodes, position3)
+      expect(node3).toBeDefined()
+      expect(node3?.type).toBe('Value')
+
+      // Position in the meta attribute
+      const position4 = { line: 4, column: 15 }
+      const node4 = findNodeAtPosition(nodes, position4)
+      expect(node4).toBeDefined()
+      expect(node4?.type).toBe('Attribute')
+      expect((node4 as Attribute).key).toBe('charset')
+
+      // Position in the multiline paragraph
+      const position5 = { line: 10, column: 10 }
+      const node5 = findNodeAtPosition(nodes, position5)
+      expect(node5).toBeDefined()
+      expect(node5?.type).toBe('Value')
+
+      // Position in a list item
+      const position6 = { line: 12, column: 10 }
+      const node6 = findNodeAtPosition(nodes, position6)
+      expect(node6).toBeDefined()
+      expect(node6?.type).toBe('Value')
+    })
   })
 })
 

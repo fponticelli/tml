@@ -56,10 +56,11 @@ describe('Node Position and Finding', () => {
     const node4 = findNodeAtPosition(nodes, position4)
     expect(node4).toBeUndefined()
 
-    // Test position on line 2 (currently not finding the child node)
-    // This test documents the current behavior, which may need to be fixed in the future
+    // Test position on line 2 (should find the child node)
     const position5 = { line: 2, column: 2 }
     const node5 = findNodeAtPosition(nodes, position5)
-    expect(node5).toBeUndefined()
+    expect(node5).toBeDefined()
+    expect(node5?.type).toBe('Block')
+    expect((node5 as BlockNode).name).toBe('child')
   })
 })

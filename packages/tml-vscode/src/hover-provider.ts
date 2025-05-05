@@ -202,7 +202,6 @@ export class TMLHoverProvider implements vscode.HoverProvider {
       }
 
       // Find the node at the position
-      this.outputChannel.appendLine(stringifyTML(nodes))
       const node = findNodeAtPosition(nodes, position)
       if (!node) {
         this.outputChannel.appendLine('No node found at position')
