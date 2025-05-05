@@ -30,12 +30,12 @@ describe('Sample File Block Comment', () => {
     // Check the block comment content
     const blockComment = blockComments[0]
     expect(blockComment.value).toBe(
-      'This is a block comment\n       that spans multiple lines'
+      'This is a block comment\n      that spans multiple lines'
     )
 
     // Check the position
-    expect(blockComment.position?.start.line).toBe(32)
-    expect(blockComment.position?.end.line).toBe(33)
+    expect(blockComment.position?.start.line).toBe(33)
+    expect(blockComment.position?.end.line).toBe(34)
   })
 })
 

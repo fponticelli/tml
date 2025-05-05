@@ -439,6 +439,59 @@ describe('findNodeAtPosition', () => {
       }
     })
 
+    it('should find value nodes in deeply nested structures', () => {
+      // Test with a more complex nested structure
+      const tml = `html lang=en
+  head
+  body
+    div class=container
+      section id=main
+        article
+          header
+            h1: Article Title
+          content:
+            This is a multiline content
+            with several paragraphs
+
+            And some spacing between them
+          footer
+            p: Copyright 2023`
+      const nodes = parseTML(tml)
+
+      // Find the content block deep in the structure
+      const htmlNode = nodes[0] as BlockNode
+      const bodyNode = findBlocksByName(htmlNode.children, 'body')[0]
+      const divNode = findBlocksByName(bodyNode.children, 'div')[0]
+      const sectionNode = findBlocksByName(divNode.children, 'section')[0]
+      const articleNode = findBlocksByName(sectionNode.children, 'article')[0]
+      const contentNode = findBlocksByName(articleNode.children, 'content')[0]
+
+      // Find the value node in the content block
+      const valueNodes = findNodesByType<ValueNode>(
+        contentNode.children,
+        'Value'
+      )
+      expect(valueNodes.length).toBe(1)
+
+      const valueNode = valueNodes[0]
+
+      // Test positions within the deeply nested multiline value
+      // Based on the debug output, the value node is at lines 11-13
+      const positions = [
+        { line: 11, column: 10 }, // First line of the value
+        { line: 12, column: 5 }, // Middle line of the value
+        { line: 13, column: 15 }, // Last line of the value
+      ]
+
+      // Each position should find the value node
+      for (const pos of positions) {
+        const foundNode = findNodeAtPosition(nodes, pos)
+        expect(foundNode).toBeDefined()
+        expect(foundNode?.type).toBe('Value')
+        expect(foundNode).toBe(valueNode)
+      }
+    })
+
     it('should find deeply nested nodes', () => {
       const tml = `html
   head

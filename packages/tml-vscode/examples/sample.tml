@@ -29,5 +29,6 @@ html lang=en
       This is a multiline string
       that spans several lines
       and is parsed as one value
+
     /* This is a block comment
-       that spans multiple lines */
+      that spans multiple lines */

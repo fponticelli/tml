@@ -1,0 +1,38 @@
+// Test file for multiline strings and comments
+
+// Basic multiline string
+description1:
+  This is a multiline string
+  that spans several lines
+  and is parsed as one value
+
+// Comment after multiline string
+description2:
+  This is another multiline string
+  with multiple lines
+/* This is a block comment
+   that spans multiple lines */
+
+// Comment before multiline string content
+description3:
+  /* This is a block comment inside the multiline context */
+  This is a multiline string
+  with a comment before it
+
+// Comment in the middle of multiline string
+description4:
+  First line of multiline string
+  // This is a line comment in the middle
+  Last line of multiline string
+
+// Multiple multiline strings
+document
+  title: My Document
+  abstract:
+    This is the first multiline string
+    that spans multiple lines
+  section
+    heading: Introduction
+    content:
+      This is the second multiline string
+      with different content

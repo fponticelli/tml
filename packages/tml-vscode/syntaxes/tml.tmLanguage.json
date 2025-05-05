@@ -78,6 +78,23 @@
           ]
         },
         {
+          "name": "meta.multiline.tml",
+          "begin": "(:)\\s*$",
+          "beginCaptures": {
+            "1": { "name": "punctuation.separator.key-value.tml" }
+          },
+          "end": "^(?!\\s+|$)",
+          "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "name": "string.unquoted.multiline.tml",
+              "match": "^\\s+(?!/\\*|//).*$"
+            }
+          ]
+        },
+        {
           "match": ":\\s*([^\\s{\\[\"'][^\\s]*|[^\\s{\\[\"'].+?)(?=$|\\s+//)",
           "captures": {
             "1": { "name": "string.unquoted.tml" }

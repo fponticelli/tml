@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "publisher": "tml",
   "license": "MIT",
+  "icon": "logo.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/fponticelli/tml.git"

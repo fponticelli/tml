@@ -99,49 +99,32 @@ export function findNodeAtPosition(
     }
   }
 
+  // Find all value nodes in the tree for multiline value checking
+  const allValueNodes = findNodesByType<ValueNode>(nodes, 'Value')
+
   // Special handling for multiline values
   // Check if the position is within a multiline value's content range
   // This is needed because the parser doesn't track the position of the value itself
   // for multiline values, only the position of the value node
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const node = nodes[i]
+  for (const valueNode of allValueNodes) {
+    // For multiline values, the value's content might span multiple lines
+    // Check if the position is within the expected range of the value's content
+    if (valueNode.position) {
+      // The value's content starts after the colon and indentation
+      const valueStartLine = valueNode.position.start.line
+      const valueEndLine = valueNode.position.end.line
 
-    if (node.type === 'Block') {
-      const blockNode = node as BlockNode
-
-      // Check all blocks in the tree
-      for (const child of blockNode.children) {
-        if (child.type === 'Block') {
-          const childBlock = child as BlockNode
-
-          // Find value nodes in this block
-          const valueNodes = childBlock.children.filter(
-            n => n.type === 'Value'
-          ) as ValueNode[]
-          for (const valueNode of valueNodes) {
-            // For multiline values, the value's content might span multiple lines
-            // Check if the position is within the expected range of the value's content
-            if (valueNode.position) {
-              // The value's content starts after the colon and indentation
-              const valueStartLine = valueNode.position.start.line
-
-              // For multiline values, the content typically starts on the next line
-              // and continues until the end of the value node
-              if (
-                // Check if position is on a line after the value node's start line
-                // and before or at the value node's end line
-                (position.line > valueStartLine &&
-                  position.line <= valueNode.position.end.line) ||
-                // Or if position is on the same line as the value node's start line
-                // but after the colon
-                (position.line === valueStartLine &&
-                  position.column > valueNode.position.start.column + 1)
-              ) {
-                return valueNode
-              }
-            }
-          }
-        }
+      // For multiline values, check if position is within the value's range
+      if (
+        // Check if position is on a line after the value node's start line
+        // and before or at the value node's end line
+        (position.line > valueStartLine && position.line <= valueEndLine) ||
+        // Or if position is on the same line as the value node's start line
+        // but after the colon
+        (position.line === valueStartLine &&
+          position.column > valueNode.position.start.column + 1)
+      ) {
+        return valueNode
       }
     }
   }
