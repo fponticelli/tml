@@ -19,7 +19,9 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@typedml/parser": ["../tml-parser/src/index.ts"],
+      "@typedml/parser/*": ["../tml-parser/src/*"]
     }
   },
   "include": ["src"]

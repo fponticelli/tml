@@ -12,7 +12,7 @@ import {
   PositionedObjectValue,
   ArrayElement,
   ObjectField,
-} from '@tml/parser'
+} from '@typedml/parser/types'
 
 /**
  * Options for stringifying TML
@@ -62,11 +62,11 @@ export function stringifyTML(
       node.type === 'Block' &&
       (node as BlockNode).name === 'html' &&
       (node as BlockNode).children.some(
-        child =>
+        (child: Node) =>
           child.type === 'Block' &&
           (child as BlockNode).name === 'body' &&
           (child as BlockNode).children.some(
-            grandchild =>
+            (grandchild: Node) =>
               grandchild.type === 'Block' &&
               (grandchild as BlockNode).name === 'description'
           )
@@ -166,11 +166,13 @@ function stringifyBlockNode(
   let result = `${indent}${name}`
 
   // Group children by type
-  const attributes = children.filter(child => child.type === 'Attribute')
+  const attributes = children.filter(
+    (child: Node) => child.type === 'Attribute'
+  )
 
   // Special handling for config attribute to avoid it being treated as part of the body
   const configAttribute = attributes.find(
-    attr =>
+    (attr: Node) =>
       (attr as Attribute).key === 'config' &&
       (attr as Attribute).value.type === 'String' &&
       ((attr as Attribute).value as StringValue).value.startsWith('{')
@@ -178,19 +180,19 @@ function stringifyBlockNode(
 
   // Filter out the config attribute if it's a special case
   const filteredAttributes = configAttribute
-    ? attributes.filter(attr => attr !== configAttribute)
+    ? attributes.filter((attr: Node) => attr !== configAttribute)
     : attributes
 
   // Special handling for the body block to remove server/retries/features blocks
   // that are part of the config object
   const isBodyBlock = name === 'body'
 
-  const valueNodes = children.filter(child => child.type === 'Value')
+  const valueNodes = children.filter((child: Node) => child.type === 'Value')
 
   // Get all comments and sort them by position
   const allComments = children
-    .filter(child => child.type === 'Comment')
-    .sort((a, b) => {
+    .filter((child: Node) => child.type === 'Comment')
+    .sort((a: Node, b: Node) => {
       const posA = a.position?.start.line || 0
       const posB = b.position?.start.line || 0
       return posA - posB
@@ -198,14 +200,14 @@ function stringifyBlockNode(
 
   // Separate line comments and block comments
   const commentNodes = allComments.filter(
-    child => (child as CommentNode).isLineComment
+    (child: Node) => (child as CommentNode).isLineComment
   )
   const blockCommentNodes = allComments.filter(
-    child => !(child as CommentNode).isLineComment
+    (child: Node) => !(child as CommentNode).isLineComment
   )
 
   // Filter out server/retries/features blocks if this is the body block and we have a config attribute
-  let blockNodes = children.filter(child => {
+  let blockNodes = children.filter((child: Node) => {
     if (isBodyBlock && configAttribute && child.type === 'Block') {
       const blockName = (child as BlockNode).name
       // Filter out blocks that are part of the config object
@@ -227,7 +229,7 @@ function stringifyBlockNode(
   // We need to add the block comment after the description block
   const hasConfigAttribute = configAttribute !== undefined
   const descriptionBlockIndex = blockNodes.findIndex(
-    node => (node as BlockNode).name === 'description'
+    (node: Node) => (node as BlockNode).name === 'description'
   )
 
   if (name === 'body' && hasConfigAttribute && descriptionBlockIndex !== -1) {
@@ -251,7 +253,7 @@ function stringifyBlockNode(
   // Add attributes inline
   if (filteredAttributes.length > 0) {
     const attributesStr = filteredAttributes
-      .map(attr => stringifyAttribute(attr as Attribute, options))
+      .map((attr: Node) => stringifyAttribute(attr as Attribute, options))
       .join(' ')
     result += ` ${attributesStr}`
   }
@@ -263,12 +265,15 @@ function stringifyBlockNode(
       ? valueNodes[0].position?.start.line || Infinity
       : Infinity
   const inlineBlockComments = blockCommentNodes.filter(
-    comment => (comment.position?.start.line || Infinity) < valuePosition
+    (comment: Node) =>
+      (comment.position?.start.line || Infinity) < valuePosition
   )
 
   if (inlineBlockComments.length > 0) {
     const blockCommentsStr = inlineBlockComments
-      .map(comment => stringifyComment(comment as CommentNode, 0, options))
+      .map((comment: Node) =>
+        stringifyComment(comment as CommentNode, 0, options)
+      )
       .join(' ')
     result += ` ${blockCommentsStr}`
   }
@@ -295,7 +300,8 @@ ${indent}}` // Full representation based on the test case
   // Add line comments and block nodes as children
   // Include any block comments that weren't added inline
   const remainingBlockComments = blockCommentNodes.filter(
-    comment => !inlineBlockComments.includes(comment)
+    (comment: CommentNode) =>
+      !inlineBlockComments.some((c: Node) => c === comment)
   )
 
   // Special handling for the block comment in the test case
@@ -536,7 +542,7 @@ function stringifyArrayValue(
 
   // For simple arrays with only primitive values, use compact form
   const isSimpleArray = elements.every(
-    element =>
+    (element: { type: string }) =>
       element.type === 'Element' &&
       ['String', 'Number', 'Boolean'].includes(
         (element as ArrayElement).value.type
@@ -545,7 +551,7 @@ function stringifyArrayValue(
 
   if (isSimpleArray && elements.length <= 5 && !options.pretty) {
     const elementsStr = elements
-      .map(element => {
+      .map((element: { type: string }) => {
         if (element.type === 'Element') {
           const elementValue = (element as ArrayElement).value
           // Force quotes for string values in arrays
@@ -569,7 +575,7 @@ function stringifyArrayValue(
   const closingIndent = ' '.repeat(indentSize * indentLevel)
 
   const elementsStr = elements
-    .map(element => {
+    .map((element: { type: string }) => {
       if (element.type === 'Element') {
         const elementValue = (element as ArrayElement).value
         // Force quotes for string values in arrays
@@ -594,7 +600,7 @@ function stringifyArrayValue(
   return options.pretty
     ? `[\n${elementsStr}\n${closingIndent}]`
     : `[${elements
-        .map(e =>
+        .map((e: { type: string }) =>
           e.type === 'Element'
             ? stringifyValue(
                 (e as ArrayElement).value,
@@ -625,7 +631,7 @@ function stringifyObjectValue(
 
   // For simple objects with only primitive values, use compact form
   const isSimpleObject = fields.every(
-    field =>
+    (field: { type: string }) =>
       field.type === 'Field' &&
       ['String', 'Number', 'Boolean'].includes(
         (field as ObjectField).value.type
@@ -634,7 +640,7 @@ function stringifyObjectValue(
 
   if (isSimpleObject && fields.length <= 3 && !options.pretty) {
     const fieldsStr = fields
-      .map(field => {
+      .map((field: { type: string }) => {
         if (field.type === 'Field') {
           const { key, value } = field as ObjectField
           // Force quotes for string values in objects
@@ -653,7 +659,7 @@ function stringifyObjectValue(
   const closingIndent = ' '.repeat(indentSize * indentLevel)
 
   const fieldsStr = fields
-    .map(field => {
+    .map((field: { type: string }) => {
       if (field.type === 'Field') {
         const { key, value } = field as ObjectField
         // Force quotes for string values in objects
@@ -669,7 +675,7 @@ function stringifyObjectValue(
   return options.pretty
     ? `{\n${fieldsStr}\n${closingIndent}}`
     : `{${fields
-        .map(f =>
+        .map((f: { type: string }) =>
           f.type === 'Field'
             ? `${(f as ObjectField).key}: ${stringifyValue((f as ObjectField).value, options, (f as ObjectField).value.type === 'String', indentLevel)}`
             : ''

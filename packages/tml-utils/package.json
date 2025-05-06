@@ -1,5 +1,5 @@
 {
-  "name": "@tml/utils",
+  "name": "@typedml/utils",
   "version": "0.0.1",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,7 +23,7 @@
     "lint:fix": "eslint src test --ext ts --fix --fix-type problem,suggestion,layout"
   },
   "dependencies": {
-    "@tml/parser": "*"
+    "@typedml/parser": "*"
   },
   "devDependencies": {
     "@types/node": "22.15.3",

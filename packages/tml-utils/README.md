@@ -1,4 +1,4 @@
-# @tml/utils
+# @typedml/utils
 
 Utility functions for working with Typed Markup Language (TML) nodes.
 
@@ -13,7 +13,7 @@ Utility functions for working with Typed Markup Language (TML) nodes.
 ## Installation
 
 ```bash
-yarn add @tml/utils
+yarn add @typedml/utils
 ```
 
 ## Usage
@@ -21,13 +21,13 @@ yarn add @tml/utils
 ### Finding Nodes
 
 ```typescript
-import { parseTML } from '@tml/parser'
+import { parseTML } from '@typedml/parser'
 import {
   findNodeAtPosition,
   findParentBlock,
   findNodesByType,
   findBlocksByName,
-} from '@tml/utils'
+} from '@typedml/utils'
 
 // Parse TML content
 const nodes = parseTML(`
@@ -52,8 +52,8 @@ const divBlocks = findBlocksByName(nodes, 'div')
 ### Stringifying Nodes
 
 ```typescript
-import { parseTML } from '@tml/parser'
-import { stringifyTML } from '@tml/utils'
+import { parseTML } from '@typedml/parser'
+import { stringifyTML } from '@typedml/utils'
 
 // Parse TML content
 const nodes = parseTML(`

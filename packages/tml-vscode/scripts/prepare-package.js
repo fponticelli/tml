@@ -17,7 +17,7 @@ function buildAndCopyPackage(packageName, packageNamespace) {
     process.exit(1);
   }
 
-  console.log(`Building @tml/${packageNamespace} package...`);
+  console.log(`Building @typedml/${packageNamespace} package...`);
 
   // Build the package
   execSync('yarn build', {
@@ -25,10 +25,10 @@ function buildAndCopyPackage(packageName, packageNamespace) {
     stdio: 'inherit'
   });
 
-  console.log(`@tml/${packageNamespace} package built successfully`);
+  console.log(`@typedml/${packageNamespace} package built successfully`);
 
-  // Create node_modules/@tml directory if it doesn't exist
-  const tmlModulesDir = path.resolve(__dirname, '../node_modules/@tml');
+  // Create node_modules/@typedml directory if it doesn't exist
+  const tmlModulesDir = path.resolve(__dirname, '../node_modules/@typedml');
   if (!fs.existsSync(tmlModulesDir)) {
     fs.mkdirSync(tmlModulesDir, { recursive: true });
   }
@@ -56,7 +56,18 @@ function buildAndCopyPackage(packageName, packageNamespace) {
   for (const file of files) {
     const srcFile = path.resolve(srcDistDir, file);
     const destFile = path.resolve(distDir, file);
-    fs.copyFileSync(srcFile, destFile);
+
+    // Skip if not a regular file (e.g., socket, directory)
+    try {
+      const stats = fs.statSync(srcFile);
+      if (stats.isFile()) {
+        fs.copyFileSync(srcFile, destFile);
+      } else {
+        console.log(`Skipping non-file: ${srcFile}`);
+      }
+    } catch (err) {
+      console.warn(`Warning: Could not copy ${srcFile}: ${err.message}`);
+    }
   }
 
   console.log(`Copied ${packageName} package from ${packagePath} to ${packageDestPath}`);

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { parseTML } from '@typedml/parser'
 import {
-  parseTML,
   BlockNode,
   ValueNode,
   Attribute,
   CommentNode,
   StringValue,
-} from '@tml/parser'
+} from '@typedml/parser'
 import {
   findNodeAtPosition,
   findParentBlock,

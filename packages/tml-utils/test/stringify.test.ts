@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { parseTML, BlockNode } from '@tml/parser'
+import { parseTML } from '@typedml/parser'
+import { BlockNode } from '@typedml/parser'
 import { stringifyTML, StringifyOptions } from '../src'
 
 describe('stringifyTML', () => {

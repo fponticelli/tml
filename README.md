@@ -31,8 +31,8 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 ## Packages
 
-- [@tml/parser](./packages/tml-parser): A parser for the Typed Markup Language
-- [@tml/utils](./packages/tml-utils): Utility functions for working with TML nodes
+- [@typedml/parser](./packages/tml-parser): A parser for the Typed Markup Language
+- [@typedml/utils](./packages/tml-utils): Utility functions for working with TML nodes
 - [tml-vscode](./packages/tml-vscode): VS Code extension for TML syntax highlighting
 
 ## Development

@@ -1,4 +1,10 @@
-import { Node, BlockNode, ValueNode, Attribute, CommentNode } from '@tml/parser'
+import {
+  Node,
+  BlockNode,
+  ValueNode,
+  Attribute,
+  CommentNode,
+} from '@typedml/parser/types'
 
 /**
  * Interface for position-like objects that can be used to check if a position is within a range
@@ -85,7 +91,7 @@ export function findNodeAtPosition(
 
       // Check for value nodes with structured values (objects or arrays)
       const valueNodes = blockNode.children.filter(
-        child => child.type === 'Value'
+        (child: Node) => child.type === 'Value'
       ) as ValueNode[]
       for (const valueNode of valueNodes) {
         if (

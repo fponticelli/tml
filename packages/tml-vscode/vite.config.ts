@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: {
-      '@tml/parser': resolve(__dirname, '../tml-parser/dist'),
-      '@tml/utils': resolve(__dirname, '../tml-utils/dist'),
+      '@typedml/parser': resolve(__dirname, '../tml-parser/dist'),
+      '@typedml/utils': resolve(__dirname, '../tml-utils/dist'),
     },
   },
   watch:

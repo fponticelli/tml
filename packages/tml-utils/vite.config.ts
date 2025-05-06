@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: './src/index.ts',
-      name: '@tml/utils',
+      name: '@typedml/utils',
       fileName: 'index',
     },
     rollupOptions: {
@@ -19,6 +19,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@typedml/parser': resolve(__dirname, '../tml-parser/dist'),
     },
   },
 })

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseTML, BlockNode } from '@tml/parser'
+import { parseTML, BlockNode } from '@typedml/parser'
 import { findNodeAtPosition } from '../src'
 
 describe('Node Position and Finding', () => {

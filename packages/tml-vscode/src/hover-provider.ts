@@ -1,18 +1,17 @@
 import * as vscode from 'vscode'
+import { parseTML } from '@typedml/parser'
 import {
-  parseTML,
   Node,
   BlockNode,
   ValueNode,
   Attribute,
   Position,
   Point,
-} from '@tml/parser'
+} from '@typedml/parser/types'
 import {
   findNodeAtPosition as findNodeAtPositionUtil,
   findParentBlock,
-  stringifyTML,
-} from '@tml/utils'
+} from '@typedml/utils'
 
 /**
  * Converts a TML Point to a VSCode Position
@@ -63,7 +62,7 @@ function getHoverInfo(
       markdown.appendMarkdown(`**Block**: \`${blockNode.name}\``)
 
       const counts = blockNode.children.reduce(
-        (acc, child) => {
+        (acc: Record<string, number>, child: Node) => {
           acc[child.type] = (acc[child.type] || 0) + 1
           return acc
         },

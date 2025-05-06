@@ -7,7 +7,7 @@
     [
       "@semantic-release/npm",
       {
-        "pkgRoot": "packages/@tml/parser"
+        "pkgRoot": "packages/@typedml/parser"
       }
     ],
     [

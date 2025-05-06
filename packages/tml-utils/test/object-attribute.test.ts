@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseTML } from '@tml/parser'
+import { parseTML } from '@typedml/parser'
 import { stringifyTML } from '../src'
 
 describe('Object Attribute Stringification', () => {
