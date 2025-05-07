@@ -307,10 +307,54 @@ export function parseObjectValue(
         continue
       }
 
-      // Handle value separator
-      if (char === ',' && inQuote === null && inObject === 0 && inArray === 0) {
+      // Handle value separator (comma or whitespace followed by a new key)
+      if (
+        (char === ',' && inQuote === null && inObject === 0 && inArray === 0) ||
+        (char === ' ' &&
+          inQuote === null &&
+          inObject === 0 &&
+          inArray === 0 &&
+          !collectingKey &&
+          i < content.length - 1 &&
+          // Look ahead to see if this is followed by what looks like a new key
+          (() => {
+            // Find the next non-whitespace character
+            let j = i + 1
+            while (j < content.length && /\s/.test(content[j])) j++
+
+            // Check if there's a colon after some text (potential key)
+            if (j < content.length) {
+              let potentialKey = ''
+              let k = j
+              while (
+                k < content.length &&
+                content[k] !== ':' &&
+                content[k] !== ',' &&
+                content[k] !== '{' &&
+                content[k] !== '}' &&
+                content[k] !== '[' &&
+                content[k] !== ']' &&
+                !/\s/.test(content[k])
+              ) {
+                potentialKey += content[k]
+                k++
+              }
+
+              // Skip whitespace after the potential key
+              while (k < content.length && /\s/.test(content[k])) k++
+
+              // If we found a non-empty key followed by a colon, this is a new field
+              return (
+                potentialKey.trim().length > 0 &&
+                k < content.length &&
+                content[k] === ':'
+              )
+            }
+            return false
+          })())
+      ) {
         if (currentKey) {
-          processFieldValue(currentKey.trim(), currentValue)
+          processFieldValue(currentKey.trim(), currentValue.trim())
         }
         currentKey = ''
         currentValue = ''
@@ -329,7 +373,7 @@ export function parseObjectValue(
     // Process the last field if there's any remaining key/value
     // This handles the case where the object doesn't end with a comma
     if (currentKey && !collectingKey) {
-      processFieldValue(currentKey.trim(), currentValue)
+      processFieldValue(currentKey.trim(), currentValue.trim())
     }
   }
 
@@ -491,9 +535,26 @@ export function parseArrayValue(
         inArray--
       }
 
-      // Handle element separator
-      if (char === ',' && inQuote === null && inObject === 0 && inArray === 0) {
-        processValue(currentValue)
+      // Handle element separator (comma or whitespace followed by a new value)
+      if (
+        (char === ',' && inQuote === null && inObject === 0 && inArray === 0) ||
+        (char === ' ' &&
+          inQuote === null &&
+          inObject === 0 &&
+          inArray === 0 &&
+          currentValue.trim().length > 0 &&
+          i < content.length - 1 &&
+          // Look ahead to see if this is followed by what looks like a new value
+          (() => {
+            // Find the next non-whitespace character
+            let j = i + 1
+            while (j < content.length && /\s/.test(content[j])) j++
+
+            // If we found a non-whitespace character that's not a comma, this is a new element
+            return j < content.length && content[j] !== ','
+          })())
+      ) {
+        processValue(currentValue.trim())
         currentValue = ''
         continue
       }
@@ -505,7 +566,7 @@ export function parseArrayValue(
     // Process the last element if there's any remaining value
     // This handles the case where the array doesn't end with a comma
     if (currentValue.trim()) {
-      processValue(currentValue)
+      processValue(currentValue.trim())
     }
   }
 

@@ -264,6 +264,29 @@ export function assertArrayHasElement(
 }
 
 /**
+ * Helper function to assert that an array element is an object with specific fields
+ */
+export function assertArrayElementIsObject(
+  arr: PositionedArrayValue,
+  index: number,
+  fields: Array<{ key: string; valueType: string; value?: any }>
+): PositionedObjectValue {
+  expect(arr.elements.length).toBeGreaterThan(index)
+
+  const element = arr.elements[index] as ArrayElement
+  expect(element.type).toBe('Element')
+  expect(element.value.type).toBe('Object')
+
+  const objValue = element.value as PositionedObjectValue
+
+  for (const field of fields) {
+    assertObjectHasField(objValue, field.key, field.valueType, field.value)
+  }
+
+  return objValue
+}
+
+/**
  * Helper function to find an attribute in a block
  */
 export function findAttribute(
