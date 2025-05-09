@@ -66,7 +66,7 @@ export function assertCommentNode(
  * Helper function to get a string value from a value node
  */
 export function getStringValue(valueNode: ValueNode): string {
-  expect(valueNode.value.type).toBe('String')
+  expect(valueNode.value.type).toBe('string')
   return (valueNode.value as StringValue).value
 }
 
@@ -74,7 +74,7 @@ export function getStringValue(valueNode: ValueNode): string {
  * Helper function to get a number value from a value node
  */
 export function getNumberValue(valueNode: ValueNode): number {
-  expect(valueNode.value.type).toBe('Number')
+  expect(valueNode.value.type).toBe('number')
   return (valueNode.value as NumberValue).value
 }
 
@@ -82,7 +82,7 @@ export function getNumberValue(valueNode: ValueNode): number {
  * Helper function to get a boolean value from a value node
  */
 export function getBooleanValue(valueNode: ValueNode): boolean {
-  expect(valueNode.value.type).toBe('Boolean')
+  expect(valueNode.value.type).toBe('boolean')
   return (valueNode.value as BooleanValue).value
 }
 
@@ -121,7 +121,7 @@ export function assertBlockWithStringValue(
   expectedValue: string
 ): void {
   expect(block.children.length).toBe(1)
-  const valueNode = assertValueNode(block.children[0], 'String')
+  const valueNode = assertValueNode(block.children[0], 'string')
   expect(getStringValue(valueNode)).toBe(expectedValue)
 }
 
@@ -133,7 +133,7 @@ export function assertBlockWithNumberValue(
   expectedValue: number
 ): void {
   expect(block.children.length).toBe(1)
-  const valueNode = assertValueNode(block.children[0], 'Number')
+  const valueNode = assertValueNode(block.children[0], 'number')
   expect(getNumberValue(valueNode)).toBe(expectedValue)
 }
 
@@ -145,7 +145,7 @@ export function assertBlockWithBooleanValue(
   expectedValue: boolean
 ): void {
   expect(block.children.length).toBe(1)
-  const valueNode = assertValueNode(block.children[0], 'Boolean')
+  const valueNode = assertValueNode(block.children[0], 'boolean')
   expect(getBooleanValue(valueNode)).toBe(expectedValue)
 }
 
@@ -166,11 +166,11 @@ export function assertBlockHasAttribute(
   expect(attribute!.value.type).toBe(valueType)
 
   if (value !== undefined) {
-    if (valueType === 'String') {
+    if (valueType === 'string') {
       expect((attribute!.value as StringValue).value).toBe(value)
-    } else if (valueType === 'Number') {
+    } else if (valueType === 'number') {
       expect((attribute!.value as NumberValue).value).toBe(value)
-    } else if (valueType === 'Boolean') {
+    } else if (valueType === 'boolean') {
       expect((attribute!.value as BooleanValue).value).toBe(value)
     }
   }
@@ -227,11 +227,11 @@ export function assertObjectHasField(
   expect(field!.value.type).toBe(valueType)
 
   if (value !== undefined) {
-    if (valueType === 'String') {
+    if (valueType === 'string') {
       expect((field!.value as StringValue).value).toBe(value)
-    } else if (valueType === 'Number') {
+    } else if (valueType === 'number') {
       expect((field!.value as NumberValue).value).toBe(value)
-    } else if (valueType === 'Boolean') {
+    } else if (valueType === 'boolean') {
       expect((field!.value as BooleanValue).value).toBe(value)
     }
   }
@@ -253,11 +253,11 @@ export function assertArrayHasElement(
   expect(element.value.type).toBe(valueType)
 
   if (value !== undefined) {
-    if (valueType === 'String') {
+    if (valueType === 'string') {
       expect((element.value as StringValue).value).toBe(value)
-    } else if (valueType === 'Number') {
+    } else if (valueType === 'number') {
       expect((element.value as NumberValue).value).toBe(value)
-    } else if (valueType === 'Boolean') {
+    } else if (valueType === 'boolean') {
       expect((element.value as BooleanValue).value).toBe(value)
     }
   }
@@ -427,13 +427,13 @@ export function assertAttributeValues(
     expect(attribute).toBeDefined()
 
     if (typeof value === 'string') {
-      expect(attribute!.value.type).toBe('String')
+      expect(attribute!.value.type).toBe('string')
       expect((attribute!.value as StringValue).value).toBe(value)
     } else if (typeof value === 'number') {
-      expect(attribute!.value.type).toBe('Number')
+      expect(attribute!.value.type).toBe('number')
       expect((attribute!.value as NumberValue).value).toBe(value)
     } else if (typeof value === 'boolean') {
-      expect(attribute!.value.type).toBe('Boolean')
+      expect(attribute!.value.type).toBe('boolean')
       expect((attribute!.value as BooleanValue).value).toBe(value)
     }
   }

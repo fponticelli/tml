@@ -57,7 +57,7 @@ html lang=en
 
       const valueNode = blockNode.children[0] as ValueNode
       expect(valueNode.type).toBe('Value')
-      expect(valueNode.value.type).toBe('String')
+      expect(valueNode.value.type).toBe('string')
       expect((valueNode.value as StringValue).value).toBe(
         'https://example.com/schema/tml-html/1.0'
       )
@@ -77,7 +77,7 @@ html lang=en
       ) as Attribute
 
       expect(langAttr).toBeDefined()
-      expect(langAttr.value.type).toBe('String')
+      expect(langAttr.value.type).toBe('string')
       expect((langAttr.value as StringValue).value).toBe('en')
     })
   })
@@ -125,7 +125,7 @@ html lang=en
         child => child.type === 'Value'
       ) as ValueNode
       expect(valueNode).toBeDefined()
-      expect(valueNode.value.type).toBe('String')
+      expect(valueNode.value.type).toBe('string')
       expect((valueNode.value as StringValue).value).toBe('My Website')
     })
 
@@ -144,7 +144,7 @@ html lang=en
       ) as Attribute
 
       expect(charsetAttr).toBeDefined()
-      expect(charsetAttr.value.type).toBe('String')
+      expect(charsetAttr.value.type).toBe('string')
       expect((charsetAttr.value as StringValue).value).toBe('UTF-8')
     })
   })

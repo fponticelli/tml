@@ -183,82 +183,15 @@ export function parseLine(
 
     // Handle value nodes (inline with :)
     if (token.startsWith(':')) {
-      // Find where the value ends
-      let valueEndIndex = i
-      let inQuote: string | null = null
-      let inObject = 0
-      let inArray = 0
-
-      // Collect tokens until we find a non-quoted, non-nested token that could be an attribute or block
-      for (let j = i; j < tokens.length; j++) {
-        const currentToken = tokens[j]
-
-        // Skip the first token which is ":"
-        if (j === i) {
-          valueEndIndex = j
-          continue
-        }
-
-        // Check if this token starts a new attribute or block
-        if (!inQuote && inObject === 0 && inArray === 0) {
-          // Check for attribute pattern
-          if (currentToken.includes('=') || currentToken.endsWith('!')) {
-            valueEndIndex = j - 1
-            break
-          }
-
-          // Check for block pattern (no special characters, not in quotes)
-          if (
-            !currentToken.includes(':') &&
-            !currentToken.includes('=') &&
-            !currentToken.includes('!') &&
-            !currentToken.startsWith('"') &&
-            !currentToken.startsWith("'") &&
-            !currentToken.startsWith('{') &&
-            !currentToken.startsWith('[')
-          ) {
-            valueEndIndex = j - 1
-            break
-          }
-        }
-
-        // Track quotes, objects, and arrays
-        for (let k = 0; k < currentToken.length; k++) {
-          const char = currentToken[k]
-          const prevChar = k > 0 ? currentToken[k - 1] : ''
-
-          // Handle quotes
-          if ((char === '"' || char === "'") && prevChar !== '\\') {
-            if (inQuote === char) {
-              inQuote = null
-            } else if (inQuote === null) {
-              inQuote = char
-            }
-          }
-
-          // Handle objects
-          if (char === '{' && inQuote === null) {
-            inObject++
-          } else if (char === '}' && inQuote === null) {
-            inObject--
-          }
-
-          // Handle arrays
-          if (char === '[' && inQuote === null) {
-            inArray++
-          } else if (char === ']' && inQuote === null) {
-            inArray--
-          }
-        }
-
-        valueEndIndex = j
-      }
+      // Find where the value ends - collect all remaining tokens as part of the value
+      // This ensures that values after attributes are treated as a single value node
+      const valueEndIndex = tokens.length - 1
 
       // Collect the value tokens
-      const valueText = tokens.slice(i, valueEndIndex + 1).join(' ')
+      const valueText = tokens.slice(i).join(' ')
       children.push(parseValueNode(valueText, lineNumber, currentColumn))
 
-      // Update the current position
+      // Update the current position and exit the loop
       currentColumn += valueText.length + 1
       i = valueEndIndex
       continue

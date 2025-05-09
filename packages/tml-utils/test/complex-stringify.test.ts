@@ -91,11 +91,11 @@ html lang=en
     const arrayOutput = stringifyTML(arrayNodes)
 
     // Verify array structure is correctly stringified
-    expect(arrayOutput).toContain('block')
-    expect(arrayOutput).toContain('tags:')
-    expect(arrayOutput).toContain('item1')
-    expect(arrayOutput).toContain('item2')
-    expect(arrayOutput).toContain('item3')
+    expect(arrayOutput).toContain('block:')
+    expect(arrayOutput).toContain('tags')
+    expect(arrayOutput).toContain('"item1"')
+    expect(arrayOutput).toContain('"item2"')
+    expect(arrayOutput).toContain('"item3"')
 
     // Create a simpler test for block comment
     const commentInput = `block

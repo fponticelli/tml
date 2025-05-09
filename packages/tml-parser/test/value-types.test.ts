@@ -55,8 +55,8 @@ values
       const objValue = assertObjectValue(objValueNode)
 
       // Check object fields
-      assertObjectHasField(objValue, 'key', 'String', 'value')
-      assertObjectHasField(objValue, 'num', 'Number', 123)
+      assertObjectHasField(objValue, 'key', 'string', 'value')
+      assertObjectHasField(objValue, 'num', 'number', 123)
     }
 
     if (arrayNode) {
@@ -65,10 +65,10 @@ values
       const arrValue = assertArrayValue(arrValueNode)
 
       // Check array elements
-      assertArrayHasElement(arrValue, 0, 'Number', 1)
-      assertArrayHasElement(arrValue, 1, 'Number', 2)
-      assertArrayHasElement(arrValue, 2, 'Number', 3)
-      assertArrayHasElement(arrValue, 3, 'String', 'four')
+      assertArrayHasElement(arrValue, 0, 'number', 1)
+      assertArrayHasElement(arrValue, 1, 'number', 2)
+      assertArrayHasElement(arrValue, 2, 'number', 3)
+      assertArrayHasElement(arrValue, 3, 'string', 'four')
     }
   })
 
@@ -80,7 +80,7 @@ and should be joined together
     `
 
     const result = parseTMLValue(input)
-    expect(result.type).toBe('String')
+    expect(result.type).toBe('string')
     expect((result as StringValue).value).toBe(
       'This is a multiline value\nthat spans several lines\nand should be joined together'
     )
@@ -110,7 +110,7 @@ and should be joined together
         if (child.type === 'Value') {
           const valueNode = child as ValueNode
           // It could be parsed as a string containing the object notation
-          if (valueNode.value.type === 'String') {
+          if (valueNode.value.type === 'string') {
             return (valueNode.value as StringValue).value.includes('My App')
           }
 
@@ -121,7 +121,7 @@ and should be joined together
               (f: any) => f.type === 'Field' && f.key === 'name'
             )
 
-            if (nameField && nameField.value.type === 'String') {
+            if (nameField && nameField.value.type === 'string') {
               return (nameField.value as StringValue).value === 'My App'
             }
           }
@@ -157,7 +157,7 @@ and should be joined together
         if (child.type === 'Value') {
           const valueNode = child as ValueNode
           // It could be parsed as a string containing the array notation
-          if (valueNode.value.type === 'String') {
+          if (valueNode.value.type === 'string') {
             const strValue = valueNode.value as StringValue
             return (
               strValue.value.includes('Item 1') &&
@@ -173,13 +173,13 @@ and should be joined together
               arrValue.elements.some(
                 (el: any) =>
                   el.type === 'Element' &&
-                  el.value.type === 'String' &&
+                  el.value.type === 'string' &&
                   (el.value as StringValue).value === 'Item 1'
               ) &&
               arrValue.elements.some(
                 (el: any) =>
                   el.type === 'Element' &&
-                  el.value.type === 'String' &&
+                  el.value.type === 'string' &&
                   (el.value as StringValue).value === 'Item 2'
               )
             )
@@ -249,7 +249,7 @@ strings
       expect(valueNode).toBeDefined()
 
       if (valueNode) {
-        expect(valueNode.value.type).toBe('String')
+        expect(valueNode.value.type).toBe('string')
         const value = (valueNode.value as StringValue).value
 
         // Check that the string contains the expected content
@@ -279,7 +279,7 @@ strings
     expect(valueNode).toBeDefined()
 
     if (valueNode) {
-      expect(valueNode.value.type).toBe('String')
+      expect(valueNode.value.type).toBe('string')
       const value = (valueNode.value as StringValue).value
 
       // Check that the string has the exact expected value with newlines

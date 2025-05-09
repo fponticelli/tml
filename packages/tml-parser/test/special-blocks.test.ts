@@ -17,8 +17,8 @@ describe('Special Block Names', () => {
 
     const refBlock = assertBlockNode(result[0], '$ref')
     assertBlockHasAttributes(refBlock, [
-      { key: 'path', valueType: 'String', value: './components/button.tml' },
-      { key: 'id', valueType: 'String', value: 'myButton' },
+      { key: 'path', valueType: 'string', value: './components/button.tml' },
+      { key: 'id', valueType: 'string', value: 'myButton' },
     ])
   })
 
@@ -30,8 +30,8 @@ describe('Special Block Names', () => {
 
     const includeBlock = assertBlockNode(result[0], '$include')
     assertBlockHasAttributes(includeBlock, [
-      { key: 'source', valueType: 'String', value: './partials/header.tml' },
-      { key: 'cache', valueType: 'Boolean', value: false },
+      { key: 'source', valueType: 'string', value: './partials/header.tml' },
+      { key: 'cache', valueType: 'boolean', value: false },
     ])
   })
 
@@ -49,7 +49,7 @@ describe('Special Block Names', () => {
     assertBlockHasAttribute(
       refBlock,
       'path',
-      'String',
+      'string',
       './components/header.tml'
     )
 
@@ -58,7 +58,7 @@ describe('Special Block Names', () => {
     assertBlockHasAttribute(
       includeBlock,
       'source',
-      'String',
+      'string',
       './partials/sidebar.tml'
     )
   })
@@ -81,7 +81,7 @@ describe('Special Block Names', () => {
 
     expect(pathAttr).toBeDefined()
     if (pathAttr) {
-      expect(pathAttr.value.type).toBe('String')
+      expect(pathAttr.value.type).toBe('string')
       expect((pathAttr.value as StringValue).value).toBe('./template.tml')
     }
 
@@ -92,7 +92,7 @@ describe('Special Block Names', () => {
 
     expect(valueNode).toBeDefined()
     if (valueNode) {
-      expect(valueNode.value.type).toBe('String')
+      expect(valueNode.value.type).toBe('string')
       expect((valueNode.value as StringValue).value).toBe('Default content')
     }
   })

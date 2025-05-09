@@ -81,7 +81,7 @@ describe('Nested Multiline String Parsing', () => {
     expect(valueNode).toBeDefined()
 
     // Check that the value node contains a string with preserved newlines
-    expect(valueNode.value.type).toBe('String')
+    expect(valueNode.value.type).toBe('string')
     const value = (valueNode.value as StringValue).value
 
     // Check the exact string value with newlines
@@ -97,7 +97,7 @@ describe('Nested Multiline String Parsing', () => {
         node.children.some(
           child =>
             child.type === 'Value' &&
-            (child as ValueNode).value.type === 'String' &&
+            (child as ValueNode).value.type === 'string' &&
             ((child as ValueNode).value as StringValue).value ===
               'Additional text after the multiline string'
         )
@@ -139,7 +139,7 @@ describe('Nested Multiline String Parsing', () => {
     expect(valueNode).toBeDefined()
 
     // Check that the value node contains a string with preserved newlines
-    expect(valueNode.value.type).toBe('String')
+    expect(valueNode.value.type).toBe('string')
     const value = (valueNode.value as StringValue).value
 
     // Check the exact string value with newlines

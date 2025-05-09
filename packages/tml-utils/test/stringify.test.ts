@@ -51,17 +51,17 @@ describe('stringifyTML', () => {
         expect(node1.value.type).toBe(node2.value.type)
         if (node1.value.type !== node2.value.type) return false
 
-        if (node1.value.type === 'String') {
+        if (node1.value.type === 'string') {
           expect(node1.value.value).toBe(node2.value.value)
           if (node1.value.value !== node2.value.value) return false
         }
 
-        if (node1.value.type === 'Number') {
+        if (node1.value.type === 'number') {
           expect(node1.value.value).toBe(node2.value.value)
           if (node1.value.value !== node2.value.value) return false
         }
 
-        if (node1.value.type === 'Boolean') {
+        if (node1.value.type === 'boolean') {
           expect(node1.value.value).toBe(node2.value.value)
           if (node1.value.value !== node2.value.value) return false
         }
@@ -86,17 +86,17 @@ describe('stringifyTML', () => {
               expect(elem1.value.type).toBe(elem2.value.type)
               if (elem1.value.type !== elem2.value.type) return false
 
-              if (elem1.value.type === 'String') {
+              if (elem1.value.type === 'string') {
                 expect(elem1.value.value).toBe(elem2.value.value)
                 if (elem1.value.value !== elem2.value.value) return false
               }
 
-              if (elem1.value.type === 'Number') {
+              if (elem1.value.type === 'number') {
                 expect(elem1.value.value).toBe(elem2.value.value)
                 if (elem1.value.value !== elem2.value.value) return false
               }
 
-              if (elem1.value.type === 'Boolean') {
+              if (elem1.value.type === 'boolean') {
                 expect(elem1.value.value).toBe(elem2.value.value)
                 if (elem1.value.value !== elem2.value.value) return false
               }
@@ -127,17 +127,17 @@ describe('stringifyTML', () => {
               expect(field1.value.type).toBe(field2.value.type)
               if (field1.value.type !== field2.value.type) return false
 
-              if (field1.value.type === 'String') {
+              if (field1.value.type === 'string') {
                 expect(field1.value.value).toBe(field2.value.value)
                 if (field1.value.value !== field2.value.value) return false
               }
 
-              if (field1.value.type === 'Number') {
+              if (field1.value.type === 'number') {
                 expect(field1.value.value).toBe(field2.value.value)
                 if (field1.value.value !== field2.value.value) return false
               }
 
-              if (field1.value.type === 'Boolean') {
+              if (field1.value.type === 'boolean') {
                 expect(field1.value.value).toBe(field2.value.value)
                 if (field1.value.value !== field2.value.value) return false
               }
@@ -154,17 +154,17 @@ describe('stringifyTML', () => {
         expect(node1.value.type).toBe(node2.value.type)
         if (node1.value.type !== node2.value.type) return false
 
-        if (node1.value.type === 'String') {
+        if (node1.value.type === 'string') {
           expect(node1.value.value).toBe(node2.value.value)
           if (node1.value.value !== node2.value.value) return false
         }
 
-        if (node1.value.type === 'Number') {
+        if (node1.value.type === 'number') {
           expect(node1.value.value).toBe(node2.value.value)
           if (node1.value.value !== node2.value.value) return false
         }
 
-        if (node1.value.type === 'Boolean') {
+        if (node1.value.type === 'boolean') {
           expect(node1.value.value).toBe(node2.value.value)
           if (node1.value.value !== node2.value.value) return false
         }
@@ -203,7 +203,7 @@ describe('stringifyTML', () => {
       return a.key.localeCompare(b.key)
     }
 
-    if (a.type === 'Value' && a.value.type === 'String') {
+    if (a.type === 'Value' && a.value.type === 'string') {
       return a.value.value.localeCompare(b.value.value)
     }
 

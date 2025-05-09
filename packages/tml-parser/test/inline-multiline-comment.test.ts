@@ -33,7 +33,7 @@ describe('Inline Multiline Block Comment', () => {
     ) as Attribute
     expect(attribute).toBeDefined()
     expect(attribute.key).toBe('class')
-    expect(attribute.value.type).toBe('String')
+    expect(attribute.value.type).toBe('string')
     expect((attribute.value as StringValue).value).toBe('a')
 
     // Check the comment
@@ -51,7 +51,7 @@ describe('Inline Multiline Block Comment', () => {
       child => child.type === 'Value'
     ) as ValueNode
     expect(value).toBeDefined()
-    expect(value.value.type).toBe('String')
+    expect(value.value.type).toBe('string')
     expect((value.value as StringValue).value).toBe('value')
   })
 })

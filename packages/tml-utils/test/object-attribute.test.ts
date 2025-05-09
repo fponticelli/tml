@@ -46,7 +46,7 @@ describe('Object Attribute Stringification', () => {
 
     if (originalConfig) {
       // Verify the config attribute value type
-      if (originalConfig.value.type === 'String') {
+      if (originalConfig.value.type === 'string') {
         expect(originalConfig.value.value.startsWith('{')).toBe(true)
       } else if (originalConfig.value.type === 'Object') {
         expect(originalConfig.value.fields.length).toBeGreaterThan(0)
@@ -77,7 +77,7 @@ describe('Object Attribute Stringification', () => {
 
     if (originalConfig) {
       // Verify the config attribute value type
-      if (originalConfig.value.type === 'String') {
+      if (originalConfig.value.type === 'string') {
         expect(originalConfig.value.value.startsWith('{')).toBe(true)
       } else if (originalConfig.value.type === 'Object') {
         expect(originalConfig.value.fields.length).toBeGreaterThan(0)
@@ -109,7 +109,7 @@ describe('Object Attribute Stringification', () => {
 
     if (originalItems) {
       // Verify the items attribute value type
-      if (originalItems.value.type === 'String') {
+      if (originalItems.value.type === 'string') {
         expect(originalItems.value.value.startsWith('[')).toBe(true)
       } else if (originalItems.value.type === 'Array') {
         expect(originalItems.value.elements.length).toBeGreaterThan(0)

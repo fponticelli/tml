@@ -22,7 +22,7 @@ describe('Basic TML Parser', () => {
 
   it('should parse a block with one attribute', () => {
     const block = parseTMLAndGetFirstBlock('html lang=en', 'html', 1)
-    assertBlockHasAttribute(block, 'lang', 'String', 'en')
+    assertBlockHasAttribute(block, 'lang', 'string', 'en')
   })
 
   it('should parse a block with a value', () => {
@@ -37,7 +37,7 @@ describe('Basic TML Parser', () => {
     expect(result.length).toBe(1)
 
     const button = assertBlockNode(result[0], 'button', 1)
-    assertBlockHasAttribute(button, 'disabled', 'Boolean', true)
+    assertBlockHasAttribute(button, 'disabled', 'boolean', true)
   })
 
   it('should parse standalone value nodes', () => {
@@ -46,7 +46,7 @@ describe('Basic TML Parser', () => {
     const result = parseTML(input)
     expect(result.length).toBe(1)
 
-    const valueNode = assertValueNode(result[0], 'String')
+    const valueNode = assertValueNode(result[0], 'string')
     expect(getStringValue(valueNode)).toBe('This is a standalone value')
   })
 })

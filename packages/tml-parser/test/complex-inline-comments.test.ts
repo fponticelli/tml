@@ -57,7 +57,7 @@ describe('Complex Inline Multiline Block Comments', () => {
       child => child.type === 'Value'
     ) as ValueNode
     expect(titleValue).toBeDefined()
-    expect(titleValue.value.type).toBe('String')
+    expect(titleValue.value.type).toBe('string')
     expect((titleValue.value as StringValue).value).toBe('My Page')
 
     // Check that the p block has a value
@@ -73,7 +73,7 @@ describe('Complex Inline Multiline Block Comments', () => {
 
     const pValue = p.children.find(child => child.type === 'Value') as ValueNode
     expect(pValue).toBeDefined()
-    expect(pValue.value.type).toBe('String')
+    expect(pValue.value.type).toBe('string')
     expect((pValue.value as StringValue).value).toBe('Content')
   })
 })

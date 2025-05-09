@@ -394,7 +394,7 @@ export function parseTMLValue(input: string): Value {
         .trim()
 
       return {
-        type: 'String',
+        type: 'string',
         value: processed,
       }
     }

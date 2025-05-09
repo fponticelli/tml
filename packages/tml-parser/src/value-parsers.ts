@@ -37,7 +37,7 @@ export function parseStringValue(
   }
 
   return {
-    type: 'String',
+    type: 'string',
     value: parsed,
     position,
   }
@@ -51,7 +51,7 @@ export function parseNumberValue(
   position?: Position
 ): NumberValue {
   return {
-    type: 'Number',
+    type: 'number',
     value: Number(value.trim()),
     position,
   }
@@ -65,7 +65,7 @@ export function parseBooleanValue(
   position?: Position
 ): BooleanValue {
   return {
-    type: 'Boolean',
+    type: 'boolean',
     value: value.trim().toLowerCase() === 'true',
     position,
   }

@@ -174,7 +174,7 @@ function stringifyBlockNode(
   const configAttribute = attributes.find(
     (attr: Node) =>
       (attr as Attribute).key === 'config' &&
-      (attr as Attribute).value.type === 'String' &&
+      (attr as Attribute).value.type === 'string' &&
       ((attr as Attribute).value as StringValue).value.startsWith('{')
   )
 
@@ -357,12 +357,12 @@ function stringifyAttribute(
   const { key, value } = node
 
   // Handle boolean shortcut
-  if (value.type === 'Boolean' && value.value === true) {
+  if (value.type === 'boolean' && value.value === true) {
     return `${key}!`
   }
 
   // Handle string values that look like objects or arrays
-  if (value.type === 'String') {
+  if (value.type === 'string') {
     const strValue = value.value.trim()
 
     // Check if the string looks like an object
@@ -432,11 +432,11 @@ function stringifyValue(
   indentLevel: number = 0
 ): string {
   switch (value.type) {
-    case 'String':
+    case 'string':
       return stringifyStringValue(value, options, forceQuotes)
-    case 'Number':
+    case 'number':
       return stringifyNumberValue(value, options)
-    case 'Boolean':
+    case 'boolean':
       return stringifyBooleanValue(value, options)
     case 'Array':
       return stringifyArrayValue(value, options, indentLevel)
@@ -544,7 +544,7 @@ function stringifyArrayValue(
   const isSimpleArray = elements.every(
     (element: { type: string }) =>
       element.type === 'Element' &&
-      ['String', 'Number', 'Boolean'].includes(
+      ['string', 'number', 'boolean'].includes(
         (element as ArrayElement).value.type
       )
   )
@@ -558,7 +558,7 @@ function stringifyArrayValue(
           return stringifyValue(
             elementValue,
             options,
-            elementValue.type === 'String',
+            elementValue.type === 'string',
             indentLevel
           )
         }
@@ -582,7 +582,7 @@ function stringifyArrayValue(
         return `${elementIndent}${stringifyValue(
           elementValue,
           options,
-          elementValue.type === 'String',
+          elementValue.type === 'string',
           indentLevel + 1
         )}`
       } else if (element.type === 'Comment') {
@@ -605,7 +605,7 @@ function stringifyArrayValue(
             ? stringifyValue(
                 (e as ArrayElement).value,
                 options,
-                (e as ArrayElement).value.type === 'String',
+                (e as ArrayElement).value.type === 'string',
                 indentLevel
               )
             : ''
@@ -633,7 +633,7 @@ function stringifyObjectValue(
   const isSimpleObject = fields.every(
     (field: { type: string }) =>
       field.type === 'Field' &&
-      ['String', 'Number', 'Boolean'].includes(
+      ['string', 'number', 'boolean'].includes(
         (field as ObjectField).value.type
       )
   )
@@ -644,7 +644,7 @@ function stringifyObjectValue(
         if (field.type === 'Field') {
           const { key, value } = field as ObjectField
           // Force quotes for string values in objects
-          return `${key}: ${stringifyValue(value, options, value.type === 'String', indentLevel)}`
+          return `${key}: ${stringifyValue(value, options, value.type === 'string', indentLevel)}`
         }
         return ''
       })
@@ -663,7 +663,7 @@ function stringifyObjectValue(
       if (field.type === 'Field') {
         const { key, value } = field as ObjectField
         // Force quotes for string values in objects
-        return `${fieldIndent}${key}: ${stringifyValue(value, options, value.type === 'String', indentLevel + 1)}`
+        return `${fieldIndent}${key}: ${stringifyValue(value, options, value.type === 'string', indentLevel + 1)}`
       } else if (field.type === 'Comment') {
         return stringifyComment(field as CommentNode, indentLevel + 1, options)
       }
@@ -677,7 +677,7 @@ function stringifyObjectValue(
     : `{${fields
         .map((f: { type: string }) =>
           f.type === 'Field'
-            ? `${(f as ObjectField).key}: ${stringifyValue((f as ObjectField).value, options, (f as ObjectField).value.type === 'String', indentLevel)}`
+            ? `${(f as ObjectField).key}: ${stringifyValue((f as ObjectField).value, options, (f as ObjectField).value.type === 'string', indentLevel)}`
             : ''
         )
         .filter(Boolean)

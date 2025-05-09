@@ -54,7 +54,7 @@ export type Attribute = {
  * @property position - Location of the string value in source.
  */
 export type StringValue = {
-  type: 'String'
+  type: 'string'
   value: string
   position?: Position
 }
@@ -66,7 +66,7 @@ export type StringValue = {
  * @property position - Location of the number in source.
  */
 export type NumberValue = {
-  type: 'Number'
+  type: 'number'
   value: number
   position?: Position
 }
@@ -78,7 +78,7 @@ export type NumberValue = {
  * @property position - Location of the boolean in source.
  */
 export type BooleanValue = {
-  type: 'Boolean'
+  type: 'boolean'
   value: boolean
   position?: Position
 }

@@ -7,6 +7,7 @@ export function tokenizeLine(line: string): string[] {
   let inQuote: string | null = null
   let inObject = 0
   let inArray = 0
+  let foundColon = false
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i]
@@ -52,6 +53,34 @@ export function tokenizeLine(line: string): string[] {
       continue
     }
 
+    // Special handling for colon - if we find a colon outside of quotes, objects, or arrays,
+    // and we already have tokens, treat everything after it as a value
+    if (
+      char === ':' &&
+      inQuote === null &&
+      inObject === 0 &&
+      inArray === 0 &&
+      tokens.length > 0
+    ) {
+      // If we have a current token, add it
+      if (current) {
+        tokens.push(current)
+        current = ''
+      }
+
+      // Add the colon as a separate token
+      tokens.push(':')
+
+      // Collect the rest of the line as a single token for the value
+      if (i < line.length - 1) {
+        tokens.push(line.substring(i + 1).trim())
+      }
+
+      // We're done processing this line
+      foundColon = true
+      break
+    }
+
     // Handle whitespace as token separator (when not in quotes, objects, or arrays)
     if (char === ' ' && inQuote === null && inObject === 0 && inArray === 0) {
       if (current) {
@@ -91,8 +120,8 @@ export function tokenizeLine(line: string): string[] {
     current += char
   }
 
-  // Add the last token if there is one
-  if (current) {
+  // Add the last token if there is one and we didn't find a colon
+  if (current && !foundColon) {
     tokens.push(current)
   }
 

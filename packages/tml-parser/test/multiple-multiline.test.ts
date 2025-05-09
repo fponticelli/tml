@@ -45,7 +45,7 @@ describe('Multiple Multiline String Parsing', () => {
       (child: Node) => child.type === 'Value'
     ) as ValueNode
     expect(abstractValueNode).toBeDefined()
-    expect(abstractValueNode.value.type).toBe('String')
+    expect(abstractValueNode.value.type).toBe('string')
     const abstractValue = (abstractValueNode.value as StringValue).value
     expect(abstractValue).toBe(
       'This is the first multiline string\nthat spans multiple lines\nand should be parsed correctly'
@@ -60,7 +60,7 @@ describe('Multiple Multiline String Parsing', () => {
           child =>
             child.type === 'Attribute' &&
             child.key === 'id' &&
-            child.value.type === 'String' &&
+            child.value.type === 'string' &&
             (child.value as StringValue).value === 'intro'
         )
     ) as BlockNode
@@ -77,7 +77,7 @@ describe('Multiple Multiline String Parsing', () => {
       (child: Node) => child.type === 'Value'
     ) as ValueNode
     expect(contentValueNode).toBeDefined()
-    expect(contentValueNode.value.type).toBe('String')
+    expect(contentValueNode.value.type).toBe('string')
     const contentValue = (contentValueNode.value as StringValue).value
     expect(contentValue).toBe(
       'This is the second multiline string\nwith different content\nthat should also be parsed correctly'
@@ -92,7 +92,7 @@ describe('Multiple Multiline String Parsing', () => {
           child =>
             child.type === 'Attribute' &&
             child.key === 'id' &&
-            child.value.type === 'String' &&
+            child.value.type === 'string' &&
             (child.value as StringValue).value === 'conclusion'
         )
     ) as BlockNode
@@ -109,7 +109,7 @@ describe('Multiple Multiline String Parsing', () => {
       (child: Node) => child.type === 'Value'
     ) as ValueNode
     expect(summaryValueNode).toBeDefined()
-    expect(summaryValueNode.value.type).toBe('String')
+    expect(summaryValueNode.value.type).toBe('string')
     const summaryValue = (summaryValueNode.value as StringValue).value
     expect(summaryValue).toBe(
       'This is the third multiline string\nwith yet another content\nthat should be parsed with newlines preserved'

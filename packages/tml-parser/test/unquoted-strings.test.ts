@@ -23,9 +23,9 @@ describe('Unquoted Strings in Arrays', () => {
       const arrValue = assertArrayValue(valueNode)
 
       // Check that the array has the expected elements
-      assertArrayHasElement(arrValue, 0, 'String', 'value1')
-      assertArrayHasElement(arrValue, 1, 'String', 'value2')
-      assertArrayHasElement(arrValue, 2, 'String', 'value3')
+      assertArrayHasElement(arrValue, 0, 'string', 'value1')
+      assertArrayHasElement(arrValue, 1, 'string', 'value2')
+      assertArrayHasElement(arrValue, 2, 'string', 'value3')
     }
   })
 
@@ -43,11 +43,11 @@ describe('Unquoted Strings in Arrays', () => {
       const arrValue = assertArrayValue(valueNode)
 
       // Check that the array has the expected elements
-      assertArrayHasElement(arrValue, 0, 'String', 'value1')
-      assertArrayHasElement(arrValue, 1, 'String', 'value2')
-      assertArrayHasElement(arrValue, 2, 'String', 'value3')
-      assertArrayHasElement(arrValue, 3, 'Number', 4)
-      assertArrayHasElement(arrValue, 4, 'Boolean', true)
+      assertArrayHasElement(arrValue, 0, 'string', 'value1')
+      assertArrayHasElement(arrValue, 1, 'string', 'value2')
+      assertArrayHasElement(arrValue, 2, 'string', 'value3')
+      assertArrayHasElement(arrValue, 3, 'number', 4)
+      assertArrayHasElement(arrValue, 4, 'boolean', true)
     }
   })
 
@@ -65,9 +65,9 @@ describe('Unquoted Strings in Arrays', () => {
       const arrValue = assertArrayValue(valueNode)
 
       // Check that the array has the expected elements
-      assertArrayHasElement(arrValue, 0, 'String', 'value-with-dash')
-      assertArrayHasElement(arrValue, 1, 'String', 'value_with_underscore')
-      assertArrayHasElement(arrValue, 2, 'String', 'value.with.dots')
+      assertArrayHasElement(arrValue, 0, 'string', 'value-with-dash')
+      assertArrayHasElement(arrValue, 1, 'string', 'value_with_underscore')
+      assertArrayHasElement(arrValue, 2, 'string', 'value.with.dots')
     }
   })
 
@@ -91,8 +91,8 @@ describe('Unquoted Strings in Arrays', () => {
       const firstNestedElement = arrValue.elements[0]
       expect(firstNestedElement.type).toBe('Element')
       if (firstNestedElement.type === 'Element') {
-        expect(firstNestedElement.value.type).toBe('String')
-        if (firstNestedElement.value.type === 'String') {
+        expect(firstNestedElement.value.type).toBe('string')
+        if (firstNestedElement.value.type === 'string') {
           expect(firstNestedElement.value.value).toBe('[nested1, nested2]')
         }
       }
@@ -101,8 +101,8 @@ describe('Unquoted Strings in Arrays', () => {
       const secondNestedElement = arrValue.elements[1]
       expect(secondNestedElement.type).toBe('Element')
       if (secondNestedElement.type === 'Element') {
-        expect(secondNestedElement.value.type).toBe('String')
-        if (secondNestedElement.value.type === 'String') {
+        expect(secondNestedElement.value.type).toBe('string')
+        if (secondNestedElement.value.type === 'string') {
           expect(secondNestedElement.value.value).toBe('[nested3, nested4]')
         }
       }
@@ -129,8 +129,8 @@ describe('Unquoted Strings in Arrays', () => {
       const firstElement = arrValue.elements[0]
       expect(firstElement.type).toBe('Element')
       if (firstElement.type === 'Element') {
-        expect(firstElement.value.type).toBe('String')
-        if (firstElement.value.type === 'String') {
+        expect(firstElement.value.type).toBe('string')
+        if (firstElement.value.type === 'string') {
           expect(firstElement.value.value).toBe('{ name: user1, id: 1 }')
         }
       }
@@ -139,8 +139,8 @@ describe('Unquoted Strings in Arrays', () => {
       const secondElement = arrValue.elements[1]
       expect(secondElement.type).toBe('Element')
       if (secondElement.type === 'Element') {
-        expect(secondElement.value.type).toBe('String')
-        if (secondElement.value.type === 'String') {
+        expect(secondElement.value.type).toBe('string')
+        if (secondElement.value.type === 'string') {
           expect(secondElement.value.value).toBe('{ name: user2, id: 2 }')
         }
       }
@@ -174,9 +174,9 @@ arrays
       expect(quotedValueNode).toBeDefined()
       if (quotedValueNode) {
         const quotedArray = assertArrayValue(quotedValueNode)
-        assertArrayHasElement(quotedArray, 0, 'String', 'value1')
-        assertArrayHasElement(quotedArray, 1, 'String', 'value2')
-        assertArrayHasElement(quotedArray, 2, 'String', 'value3')
+        assertArrayHasElement(quotedArray, 0, 'string', 'value1')
+        assertArrayHasElement(quotedArray, 1, 'string', 'value2')
+        assertArrayHasElement(quotedArray, 2, 'string', 'value3')
       }
 
       // Check unquoted array
@@ -184,9 +184,9 @@ arrays
       expect(unquotedValueNode).toBeDefined()
       if (unquotedValueNode) {
         const unquotedArray = assertArrayValue(unquotedValueNode)
-        assertArrayHasElement(unquotedArray, 0, 'String', 'value1')
-        assertArrayHasElement(unquotedArray, 1, 'String', 'value2')
-        assertArrayHasElement(unquotedArray, 2, 'String', 'value3')
+        assertArrayHasElement(unquotedArray, 0, 'string', 'value1')
+        assertArrayHasElement(unquotedArray, 1, 'string', 'value2')
+        assertArrayHasElement(unquotedArray, 2, 'string', 'value3')
       }
 
       // Check mixed array
@@ -194,10 +194,10 @@ arrays
       expect(mixedValueNode).toBeDefined()
       if (mixedValueNode) {
         const mixedArray = assertArrayValue(mixedValueNode)
-        assertArrayHasElement(mixedArray, 0, 'String', 'value1')
-        assertArrayHasElement(mixedArray, 1, 'String', 'value2')
-        assertArrayHasElement(mixedArray, 2, 'Number', 3)
-        assertArrayHasElement(mixedArray, 3, 'Boolean', true)
+        assertArrayHasElement(mixedArray, 0, 'string', 'value1')
+        assertArrayHasElement(mixedArray, 1, 'string', 'value2')
+        assertArrayHasElement(mixedArray, 2, 'number', 3)
+        assertArrayHasElement(mixedArray, 3, 'boolean', true)
       }
     }
   })

@@ -83,12 +83,12 @@ describe('Nested TML Structures', () => {
         expect(idAttr).toBeDefined()
 
         if (typeAttr) {
-          expect(typeAttr.value.type).toBe('String')
+          expect(typeAttr.value.type).toBe('string')
           expect((typeAttr.value as StringValue).value).toBe('text')
         }
 
         if (idAttr) {
-          expect(idAttr.value.type).toBe('String')
+          expect(idAttr.value.type).toBe('string')
           expect((idAttr.value as StringValue).value).toBe('username')
         }
       }
@@ -118,12 +118,12 @@ describe('Nested TML Structures', () => {
         expect(disabledAttr).toBeDefined()
 
         if (typeAttr) {
-          expect(typeAttr.value.type).toBe('String')
+          expect(typeAttr.value.type).toBe('string')
           expect((typeAttr.value as StringValue).value).toBe('submit')
         }
 
         if (disabledAttr) {
-          expect(disabledAttr.value.type).toBe('Boolean')
+          expect(disabledAttr.value.type).toBe('boolean')
           expect((disabledAttr.value as BooleanValue).value).toBe(true)
         }
       }
@@ -162,12 +162,12 @@ describe('Nested TML Structures', () => {
       expect(classAttr).toBeDefined()
 
       if (idAttr) {
-        expect(idAttr.value.type).toBe('String')
+        expect(idAttr.value.type).toBe('string')
         expect((idAttr.value as StringValue).value).toBe('content')
       }
 
       if (classAttr) {
-        expect(classAttr.value.type).toBe('String')
+        expect(classAttr.value.type).toBe('string')
         expect((classAttr.value as StringValue).value).toBe('wrapper')
       }
 
@@ -178,7 +178,7 @@ describe('Nested TML Structures', () => {
       expect(valueNode).toBeDefined()
 
       if (valueNode) {
-        expect(valueNode.value.type).toBe('String')
+        expect(valueNode.value.type).toBe('string')
         expect((valueNode.value as StringValue).value).toContain(
           'This is the content'
         )
@@ -197,8 +197,8 @@ describe('Nested TML Structures', () => {
 
     // Check attributes
     assertBlockHasAttributes(div, [
-      { key: 'id', valueType: 'String', value: 'container' },
-      { key: 'class', valueType: 'String', value: 'wrapper' },
+      { key: 'id', valueType: 'string', value: 'container' },
+      { key: 'class', valueType: 'string', value: 'wrapper' },
     ])
 
     // Check span block
@@ -226,7 +226,7 @@ describe('Nested TML Structures', () => {
     }
 
     // Check attribute
-    assertBlockHasAttribute(div, 'class', 'String', 'highlight')
+    assertBlockHasAttribute(div, 'class', 'string', 'highlight')
 
     // Verify counts
     assertBlockChildCounts(div, { attributes: 1, values: 1 })
@@ -259,7 +259,7 @@ describe('Nested TML Structures', () => {
 
 // Helper function to get a string value from a value node
 function getStringValue(valueNode: ValueNode): string {
-  expect(valueNode.value.type).toBe('String')
+  expect(valueNode.value.type).toBe('string')
   return (valueNode.value as StringValue).value
 }
 
@@ -278,9 +278,9 @@ function assertBlockHasAttribute(
   expect(attribute!.value.type).toBe(valueType)
 
   if (value !== undefined) {
-    if (valueType === 'String') {
+    if (valueType === 'string') {
       expect((attribute!.value as StringValue).value).toBe(value)
-    } else if (valueType === 'Boolean') {
+    } else if (valueType === 'boolean') {
       expect((attribute!.value as BooleanValue).value).toBe(value)
     }
   }

@@ -25,7 +25,7 @@ export function parseAttribute(
       type: 'Attribute',
       key,
       value: {
-        type: 'Boolean',
+        type: 'boolean',
         value: true,
         position,
       },
@@ -63,7 +63,7 @@ export function parseAttribute(
     type: 'Attribute',
     key: text,
     value: {
-      type: 'Boolean',
+      type: 'boolean',
       value: true,
       position: createLinePosition(
         line,

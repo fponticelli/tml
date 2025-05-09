@@ -23,9 +23,9 @@ describe('Optional Commas in Arrays', () => {
       const arrValue = assertArrayValue(valueNode)
 
       // Check that the array has the expected elements
-      assertArrayHasElement(arrValue, 0, 'String', 'value1')
-      assertArrayHasElement(arrValue, 1, 'String', 'value2')
-      assertArrayHasElement(arrValue, 2, 'String', 'value3')
+      assertArrayHasElement(arrValue, 0, 'string', 'value1')
+      assertArrayHasElement(arrValue, 1, 'string', 'value2')
+      assertArrayHasElement(arrValue, 2, 'string', 'value3')
     }
   })
 
@@ -43,11 +43,11 @@ describe('Optional Commas in Arrays', () => {
       const arrValue = assertArrayValue(valueNode)
 
       // Check that the array has the expected elements
-      assertArrayHasElement(arrValue, 0, 'String', 'value1')
-      assertArrayHasElement(arrValue, 1, 'String', 'value2')
-      assertArrayHasElement(arrValue, 2, 'String', 'value3')
-      assertArrayHasElement(arrValue, 3, 'Number', 4)
-      assertArrayHasElement(arrValue, 4, 'Boolean', true)
+      assertArrayHasElement(arrValue, 0, 'string', 'value1')
+      assertArrayHasElement(arrValue, 1, 'string', 'value2')
+      assertArrayHasElement(arrValue, 2, 'string', 'value3')
+      assertArrayHasElement(arrValue, 3, 'number', 4)
+      assertArrayHasElement(arrValue, 4, 'boolean', true)
     }
   })
 
@@ -65,11 +65,11 @@ describe('Optional Commas in Arrays', () => {
       const arrValue = assertArrayValue(valueNode)
 
       // Check that the array has the expected elements
-      assertArrayHasElement(arrValue, 0, 'String', 'value1')
-      assertArrayHasElement(arrValue, 1, 'String', 'value2')
-      assertArrayHasElement(arrValue, 2, 'String', 'value3')
-      assertArrayHasElement(arrValue, 3, 'String', 'value4')
-      assertArrayHasElement(arrValue, 4, 'String', 'value5')
+      assertArrayHasElement(arrValue, 0, 'string', 'value1')
+      assertArrayHasElement(arrValue, 1, 'string', 'value2')
+      assertArrayHasElement(arrValue, 2, 'string', 'value3')
+      assertArrayHasElement(arrValue, 3, 'string', 'value4')
+      assertArrayHasElement(arrValue, 4, 'string', 'value5')
     }
   })
 
@@ -91,14 +91,14 @@ describe('Optional Commas in Arrays', () => {
 
       // First object
       assertArrayElementIsObject(arrValue, 0, [
-        { key: 'name', valueType: 'String', value: 'user1' },
-        { key: 'id', valueType: 'Number', value: 1 },
+        { key: 'name', valueType: 'string', value: 'user1' },
+        { key: 'id', valueType: 'number', value: 1 },
       ])
 
       // Second object
       assertArrayElementIsObject(arrValue, 1, [
-        { key: 'name', valueType: 'String', value: 'user2' },
-        { key: 'id', valueType: 'Number', value: 2 },
+        { key: 'name', valueType: 'string', value: 'user2' },
+        { key: 'id', valueType: 'number', value: 2 },
       ])
     }
   })
@@ -126,9 +126,9 @@ describe('Optional Commas in Arrays', () => {
         expect(firstElement.value.type).toBe('Array')
         if (firstElement.value.type === 'Array') {
           const nestedArr = firstElement.value
-          assertArrayHasElement(nestedArr, 0, 'Number', 1)
-          assertArrayHasElement(nestedArr, 1, 'Number', 2)
-          assertArrayHasElement(nestedArr, 2, 'Number', 3)
+          assertArrayHasElement(nestedArr, 0, 'number', 1)
+          assertArrayHasElement(nestedArr, 1, 'number', 2)
+          assertArrayHasElement(nestedArr, 2, 'number', 3)
         }
       }
 
@@ -139,9 +139,9 @@ describe('Optional Commas in Arrays', () => {
         expect(secondElement.value.type).toBe('Array')
         if (secondElement.value.type === 'Array') {
           const nestedArr = secondElement.value
-          assertArrayHasElement(nestedArr, 0, 'Number', 4)
-          assertArrayHasElement(nestedArr, 1, 'Number', 5)
-          assertArrayHasElement(nestedArr, 2, 'Number', 6)
+          assertArrayHasElement(nestedArr, 0, 'number', 4)
+          assertArrayHasElement(nestedArr, 1, 'number', 5)
+          assertArrayHasElement(nestedArr, 2, 'number', 6)
         }
       }
 
@@ -152,9 +152,9 @@ describe('Optional Commas in Arrays', () => {
         expect(thirdElement.value.type).toBe('Array')
         if (thirdElement.value.type === 'Array') {
           const nestedArr = thirdElement.value
-          assertArrayHasElement(nestedArr, 0, 'Number', 7)
-          assertArrayHasElement(nestedArr, 1, 'Number', 8)
-          assertArrayHasElement(nestedArr, 2, 'Number', 9)
+          assertArrayHasElement(nestedArr, 0, 'number', 7)
+          assertArrayHasElement(nestedArr, 1, 'number', 8)
+          assertArrayHasElement(nestedArr, 2, 'number', 9)
         }
       }
     }

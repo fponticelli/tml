@@ -1,16 +1,17 @@
 import * as vscode from 'vscode'
-import { parseTML } from '@typedml/parser'
 import {
+  parseTML,
   Node,
   BlockNode,
   ValueNode,
   Attribute,
   Position,
   Point,
-} from '@typedml/parser/types'
+} from '@typedml/parser'
 import {
   findNodeAtPosition as findNodeAtPositionUtil,
   findParentBlock,
+  PositionIndex,
 } from '@typedml/utils'
 
 /**
@@ -97,7 +98,21 @@ function getHoverInfo(
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+        // Special case for values in attr blocks
+        if (parent.name === 'attr') {
+          // This is a value inside an attr block
+          // Find the attribute node in the parent's children
+          const attrNode = parent.children.find(
+            (child: Node) => child.type === 'Attribute'
+          ) as Attribute
+          if (attrNode) {
+            markdown.appendMarkdown(`\n\nAttribute: \`${attrNode.key}\``)
+          } else {
+            markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+          }
+        } else {
+          markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+        }
       }
 
       return markdown
@@ -108,11 +123,23 @@ function getHoverInfo(
       markdown.appendMarkdown(`**Attribute**: \`${attrNode.key}\``)
 
       // Add value type information
-      markdown.appendMarkdown(` \`${attrNode.value.type}\``)
+      markdown.appendMarkdown(`: \`${attrNode.value.type}\``)
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+        // Special case for attributes in attr blocks
+        if (parent.name === 'attr') {
+          // This is an attribute inside an attr block
+          // Find the parent of the attr block
+          const grandParent = findParentBlock(allNodes, parent)
+          if (grandParent) {
+            markdown.appendMarkdown(`\n\nParent: \`${grandParent.name}\``)
+          } else {
+            markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+          }
+        } else {
+          markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+        }
       }
 
       return markdown
@@ -123,7 +150,19 @@ function getHoverInfo(
 
       // Add parent information
       if (parent) {
-        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+        // Special case for comments in attr blocks
+        if (parent.name === 'attr') {
+          // This is a comment inside an attr block
+          // Find the parent of the attr block
+          const grandParent = findParentBlock(allNodes, parent)
+          if (grandParent) {
+            markdown.appendMarkdown(`\n\nParent: \`${grandParent.name}\``)
+          } else {
+            markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+          }
+        } else {
+          markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
+        }
       }
 
       return markdown
@@ -146,6 +185,7 @@ export class TMLHoverProvider implements vscode.HoverProvider {
   private lastDocumentVersion: number = -1
   private lastDocumentText: string = ''
   private cachedNodes: Node[] = []
+  private positionIndex?: PositionIndex
 
   constructor() {
     // Create output channels once when the provider is instantiated
@@ -183,7 +223,7 @@ export class TMLHoverProvider implements vscode.HoverProvider {
         text === this.lastDocumentText &&
         this.cachedNodes.length > 0
       ) {
-        // Use cached nodes
+        // Use cached nodes and position index
         nodes = this.cachedNodes
         this.outputChannel.appendLine(
           `Using cached nodes (${nodes.length} root nodes)`
@@ -195,27 +235,31 @@ export class TMLHoverProvider implements vscode.HoverProvider {
         this.lastDocumentVersion = documentVersion
         this.lastDocumentText = text
         this.cachedNodes = nodes
+
+        // Create a new position index for the nodes
+        this.positionIndex = new PositionIndex(nodes)
+
         this.outputChannel.appendLine(
-          `Parsed ${nodes.length} root nodes (cached)`
+          `Parsed ${nodes.length} root nodes and created position index (cached)`
         )
       }
 
-      // Find the node at the position
-      const node = findNodeAtPosition(nodes, position)
+      // Find the node at the position using the position index
+      const positionLike = {
+        line: position.line + 1, // Convert from 0-based to 1-based
+        column: position.character,
+      }
+
+      // Use the position index if available, otherwise fall back to the utility function
+      const node = this.positionIndex
+        ? this.positionIndex.findNodeAtPosition(positionLike)
+        : findNodeAtPosition(nodes, position)
       if (!node) {
         this.outputChannel.appendLine('No node found at position')
         return null
       }
 
-      // Log node information
-      this.outputChannel.appendLine(`Found node of type: ${node.type}`)
-      if (node.type === 'Block') {
-        this.outputChannel.appendLine(`Block name: ${(node as BlockNode).name}`)
-      } else if (node.type === 'Attribute') {
-        this.outputChannel.appendLine(
-          `Attribute key: ${(node as Attribute).key}`
-        )
-      }
+      // Node found at position
 
       // Get hover information
       const hoverInfo = getHoverInfo(node, document, nodes)

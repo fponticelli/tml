@@ -23,8 +23,8 @@ describe('Unquoted Strings in Objects', () => {
       const objValue = assertObjectValue(valueNode)
 
       // Check that the object has the expected fields
-      assertObjectHasField(objValue, 'name', 'String', 'MyApp')
-      assertObjectHasField(objValue, 'version', 'Number', 1.0)
+      assertObjectHasField(objValue, 'name', 'string', 'MyApp')
+      assertObjectHasField(objValue, 'version', 'number', 1.0)
     }
   })
 
@@ -42,14 +42,14 @@ describe('Unquoted Strings in Objects', () => {
       const objValue = assertObjectValue(valueNode)
 
       // Check that the object has the expected fields
-      assertObjectHasField(objValue, 'name', 'String', 'MyApp')
+      assertObjectHasField(objValue, 'name', 'string', 'MyApp')
       assertObjectHasField(
         objValue,
         'description',
-        'String',
+        'string',
         'A great application'
       )
-      assertObjectHasField(objValue, 'version', 'Number', 1.0)
+      assertObjectHasField(objValue, 'version', 'number', 1.0)
     }
   })
 
@@ -67,14 +67,14 @@ describe('Unquoted Strings in Objects', () => {
       const objValue = assertObjectValue(valueNode)
 
       // Check that the object has the expected fields
-      assertObjectHasField(objValue, 'kebab-case', 'String', 'value-with-dash')
+      assertObjectHasField(objValue, 'kebab-case', 'string', 'value-with-dash')
       assertObjectHasField(
         objValue,
         'snake_case',
-        'String',
+        'string',
         'value_with_underscore'
       )
-      assertObjectHasField(objValue, 'dots', 'String', 'value.with.dots')
+      assertObjectHasField(objValue, 'dots', 'string', 'value.with.dots')
     }
   })
 
@@ -101,8 +101,8 @@ describe('Unquoted Strings in Objects', () => {
         expect(appField.value.type).toBe('Object')
         if (appField.value.type === 'Object') {
           const appObj = appField.value
-          assertObjectHasField(appObj, 'name', 'String', 'MyApp')
-          assertObjectHasField(appObj, 'version', 'Number', 1.0)
+          assertObjectHasField(appObj, 'name', 'string', 'MyApp')
+          assertObjectHasField(appObj, 'version', 'number', 1.0)
         }
       }
 
@@ -116,8 +116,8 @@ describe('Unquoted Strings in Objects', () => {
         expect(serverField.value.type).toBe('Object')
         if (serverField.value.type === 'Object') {
           const serverObj = serverField.value
-          assertObjectHasField(serverObj, 'host', 'String', 'localhost')
-          assertObjectHasField(serverObj, 'port', 'Number', 8080)
+          assertObjectHasField(serverObj, 'host', 'string', 'localhost')
+          assertObjectHasField(serverObj, 'port', 'number', 8080)
         }
       }
     }
@@ -137,7 +137,7 @@ describe('Unquoted Strings in Objects', () => {
       const objValue = assertObjectValue(valueNode)
 
       // Check name field
-      assertObjectHasField(objValue, 'name', 'String', 'MyApp')
+      assertObjectHasField(objValue, 'name', 'string', 'MyApp')
 
       // Check tags field
       const tagsField = objValue.fields.find(
@@ -157,14 +157,14 @@ describe('Unquoted Strings in Objects', () => {
           )
           expect(elements.length).toBe(3)
 
-          expect(elements[0].value.type).toBe('String')
-          expect(elements[1].value.type).toBe('String')
-          expect(elements[2].value.type).toBe('String')
+          expect(elements[0].value.type).toBe('string')
+          expect(elements[1].value.type).toBe('string')
+          expect(elements[2].value.type).toBe('string')
 
           if (
-            elements[0].value.type === 'String' &&
-            elements[1].value.type === 'String' &&
-            elements[2].value.type === 'String'
+            elements[0].value.type === 'string' &&
+            elements[1].value.type === 'string' &&
+            elements[2].value.type === 'string'
           ) {
             expect(elements[0].value.value).toBe('web')
             expect(elements[1].value.value).toBe('app')
@@ -203,8 +203,8 @@ objects
       expect(quotedValueNode).toBeDefined()
       if (quotedValueNode) {
         const quotedObj = assertObjectValue(quotedValueNode)
-        assertObjectHasField(quotedObj, 'name', 'String', 'MyApp')
-        assertObjectHasField(quotedObj, 'version', 'String', '1.0')
+        assertObjectHasField(quotedObj, 'name', 'string', 'MyApp')
+        assertObjectHasField(quotedObj, 'version', 'string', '1.0')
       }
 
       // Check unquoted object
@@ -212,8 +212,8 @@ objects
       expect(unquotedValueNode).toBeDefined()
       if (unquotedValueNode) {
         const unquotedObj = assertObjectValue(unquotedValueNode)
-        assertObjectHasField(unquotedObj, 'name', 'String', 'MyApp')
-        assertObjectHasField(unquotedObj, 'version', 'Number', 1.0)
+        assertObjectHasField(unquotedObj, 'name', 'string', 'MyApp')
+        assertObjectHasField(unquotedObj, 'version', 'number', 1.0)
       }
 
       // Check mixed object
@@ -221,14 +221,14 @@ objects
       expect(mixedValueNode).toBeDefined()
       if (mixedValueNode) {
         const mixedObj = assertObjectValue(mixedValueNode)
-        assertObjectHasField(mixedObj, 'name', 'String', 'MyApp')
+        assertObjectHasField(mixedObj, 'name', 'string', 'MyApp')
         assertObjectHasField(
           mixedObj,
           'description',
-          'String',
+          'string',
           'A great application'
         )
-        assertObjectHasField(mixedObj, 'version', 'Number', 1.0)
+        assertObjectHasField(mixedObj, 'version', 'number', 1.0)
       }
     }
   })
