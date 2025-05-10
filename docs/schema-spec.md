@@ -8,15 +8,18 @@ This document defines the schema format for TML (Typed Markup Language), specify
 
 TML schemas are composed of nodes of three primary types: `block`, `attr`, and `value`. Each node can have constraints on its name, cardinality, type, and content.
 
-### Node Properties
+### Common Attributes
+- **min** (integer): Minimum occurrences of the node. Defaults to `1` if `nameIsPattern` is `false`, otherwise `0`.
+- **max** (integer or `'unbound'`): Maximum occurrences of the node. Defaults to `1` if `nameIsPattern` is `false`, otherwise `'unbound'`.
+- **description**: An optional description of the node purpose and content.
+- **title**: An optional title to describe the node.
+
+### Block/Node Attributes
 
 - **name**: The identifier of the node. Can be a string or an array of strings.
   If it is a string, it is a single name.
   If it is an array, it is a list of names that are all valid names for the node.
 - **nameIsPattern** (boolean): If `true`, the `name` is interpreted as a regex pattern matching multiple keys. If `name` is an array, all values in the array are treated as patterns.
-- **min** (integer): Minimum occurrences of the node. Defaults to `1` if `nameIsPattern` is `false`, otherwise `0`.
-- **max** (integer or `'unbound'`): Maximum occurrences of the node. Defaults to `1` if `nameIsPattern` is `false`, otherwise `'unbound'`.
-- **type/value definitions**: Constraints and typing information describing the node’s content.
 
 ### Defaults
 
@@ -159,9 +162,9 @@ email: "not-an-email"
 #### number
 
 - `type: 'number'`
-- `min` (default -Infinity)
-- `max` (default Infinity)
-- `step` (default 1)
+- `min` (default `unbound`)
+- `max` (default `unbound`)
+- `step` (no default)
 
 #### boolean
 
@@ -179,7 +182,10 @@ email: "not-an-email"
 
 - `type: 'object'`
 - `fields` (map of named fields)
-- `minProperties` (default 0)
+- `minFields` (default 0)
+- `maxFields` (default `'unbound'`)
+- `required` (list of required field names)
+- `patternFields` (list of field names that are regex patterns)
 
 #### const
 

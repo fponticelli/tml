@@ -7,7 +7,7 @@ html lang=en
     meta name=viewport content='width=device-width' initial-scale=1.0
   body
     h1: Welcome to TML
-    p: A concise and typed markup language.
+    p class=lead: A concise and typed markup language.
     img src=logo.png alt='Site Logo'
     // Boolean shortcut
     button disabled!

@@ -95,12 +95,36 @@ export class PositionIndex {
       // Add value positions for value nodes and attributes
       if (node.type === 'Value') {
         const valueNode = node as ValueNode
+
+        // Always index the value node itself with its position
+        // This is now guaranteed to exist since we made position required
+        const nodeRangeSize = this.calculateRangeSize(valueNode.position)
+        const nodeIndexedNode: IndexedNode = {
+          node: valueNode,
+          position: valueNode.position,
+          rangeSize: nodeRangeSize,
+        }
+
+        // Add the value node to the line map for each line it spans
+        for (
+          let line = valueNode.position.start.line;
+          line <= valueNode.position.end.line;
+          line++
+        ) {
+          if (!this.lineMap.has(line)) {
+            this.lineMap.set(line, [])
+          }
+          this.lineMap.get(line)!.push(nodeIndexedNode)
+        }
+
+        // If the value itself has a position (which might be different from the node's position),
+        // index that as well to ensure we can find the value node when hovering over the value
         if (valueNode.value.position) {
           const valueRangeSize = this.calculateRangeSize(
             valueNode.value.position
           )
           const valueIndexedNode: IndexedNode = {
-            node: valueNode,
+            node: valueNode, // Still point to the value node, not the value itself
             position: valueNode.value.position,
             rangeSize: valueRangeSize,
           }
@@ -182,14 +206,25 @@ export class PositionIndex {
       isPositionInRange(position, indexedNode.position)
     )
 
-    // Special handling for structured values (arrays and objects)
-    // This is needed to match the behavior of the original implementation
+    // Special handling for multiline values and structured values
     for (const indexedNode of matchingNodes) {
       const node = indexedNode.node
 
-      // Check for value nodes with structured values
+      // Check for value nodes (both multiline and structured)
       if (node.type === 'Value') {
         const valueNode = node as ValueNode
+
+        // Prioritize multiline values
+        if (valueNode.isMultiline) {
+          return valueNode
+        }
+
+        // Check if this is a value node with position (which should always be true now)
+        if (isPositionInRange(position, valueNode.position)) {
+          return valueNode
+        }
+
+        // Check for structured values (arrays and objects)
         if (
           valueNode.value.type === 'Array' ||
           valueNode.value.type === 'Object'
@@ -207,12 +242,26 @@ export class PositionIndex {
       if (node.type === 'Block') {
         const blockNode = node as BlockNode
 
-        // Check for value nodes with structured values
+        // Check for value nodes (both multiline and structured)
         const valueNodes = blockNode.children.filter(
           (child: Node) => child.type === 'Value'
         ) as ValueNode[]
 
         for (const valueNode of valueNodes) {
+          // Prioritize multiline values
+          if (
+            valueNode.isMultiline &&
+            isPositionInRange(position, valueNode.position)
+          ) {
+            return valueNode
+          }
+
+          // Check if this is a value node with position
+          if (isPositionInRange(position, valueNode.position)) {
+            return valueNode
+          }
+
+          // Check for structured values
           if (
             valueNode.value.position &&
             isPositionInRange(position, valueNode.value.position)

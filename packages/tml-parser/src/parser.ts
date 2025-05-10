@@ -1,4 +1,4 @@
-import { BlockNode, Node, Value, ValueNode } from '@/types'
+import { BlockNode, Node, Value, ValueNode, Position } from '@/types'
 import { createPosition } from './position'
 import { parseValue } from './value-parsers'
 import { parseLine } from './line-parser'
@@ -214,15 +214,17 @@ export function parseTML(input: string): Node[] {
       } else {
         // We've reached the end of the multiline value, process it
         const valueText = collectingValue.lines.join('\n')
+        const valuePosition = createPosition(
+          lineNumber - collectingValue.lines.length,
+          collectingValue.startIndent,
+          lineNumber - 1,
+          collectingValue.lines[collectingValue.lines.length - 1].length
+        )
         const valueNode: ValueNode = {
           type: 'Value',
-          value: parseTMLValue(valueText),
-          position: createPosition(
-            lineNumber - collectingValue.lines.length,
-            collectingValue.startIndent,
-            lineNumber - 1,
-            collectingValue.lines[collectingValue.lines.length - 1].length
-          ),
+          value: parseTMLValue(valueText, valuePosition), // Pass position to parseTMLValue
+          position: valuePosition,
+          isMultiline: true,
         }
 
         collectingValue.blockNode.children.push(valueNode)
@@ -297,15 +299,17 @@ export function parseTML(input: string): Node[] {
   // Process any remaining multiline value
   if (collectingValue) {
     const valueText = collectingValue.lines.join('\n')
+    const valuePosition = createPosition(
+      lines.length - collectingValue.lines.length + 1,
+      collectingValue.startIndent,
+      lines.length,
+      collectingValue.lines[collectingValue.lines.length - 1].length
+    )
     const valueNode: ValueNode = {
       type: 'Value',
-      value: parseTMLValue(valueText),
-      position: createPosition(
-        lines.length - collectingValue.lines.length + 1,
-        collectingValue.startIndent,
-        lines.length,
-        collectingValue.lines[collectingValue.lines.length - 1].length
-      ),
+      value: parseTMLValue(valueText, valuePosition),
+      position: valuePosition,
+      isMultiline: true,
     }
 
     collectingValue.blockNode.children.push(valueNode)
@@ -346,8 +350,10 @@ export function parseTML(input: string): Node[] {
 
 /**
  * Parses a multiline TML string into a single value.
+ * @param input The input string to parse
+ * @param position Optional position information for the value
  */
-export function parseTMLValue(input: string): Value {
+export function parseTMLValue(input: string, position?: Position): Value {
   // Check if this is a multiline object or array
   const trimmed = input.trim()
   if (
@@ -356,7 +362,7 @@ export function parseTMLValue(input: string): Value {
   ) {
     // Make sure we preserve comments in the object/array
     try {
-      return parseValue(trimmed)
+      return parseValue(trimmed, position)
     } catch (error) {
       // If parsing fails, fall back to treating it as a string
       // eslint-disable-next-line no-console
@@ -396,6 +402,7 @@ export function parseTMLValue(input: string): Value {
       return {
         type: 'string',
         value: processed,
+        position, // Add position information
       }
     }
   }
@@ -406,5 +413,5 @@ export function parseTMLValue(input: string): Value {
     .filter(line => line.length > 0)
   const joined = trimmedLines.join('\n')
 
-  return parseValue(joined)
+  return parseValue(joined, position)
 }

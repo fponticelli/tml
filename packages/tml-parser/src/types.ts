@@ -151,13 +151,15 @@ export type Value =
 /**
  * Represents a standalone literal value (anonymous), prefixed by ":".
  * @property type - Discriminator for the node type ("Value")
- * @property position - Span covering the value line.
+ * @property position - Span covering the value line. Required for multiline values.
  * @property value - The contained value node.
+ * @property isMultiline - Indicates if this is a multiline value (optional).
  */
 export type ValueNode = {
   type: 'Value'
-  position?: Position
+  position: Position // Making position required
   value: Value
+  isMultiline?: boolean // Optional flag to indicate multiline values
 }
 
 /**

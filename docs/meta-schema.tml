@@ -1,0 +1,198 @@
+ordered
+  $ref: schema
+  $ref: anyNodeOrGroup
+  $ref: definition
+
+// $schema
+definition name=schema
+  block name=schema min=0
+    value: { type: string, minLength: 1 }
+
+// unordered, orderedm oneOf
+definition name=group
+  block name=[unoredered, ordered, oneOf]
+    $ref: [minCardinality, maxCardinality, description, title]
+    $ref: anyNodeOrGroup
+    $ref: ref
+
+// block
+definition name=block
+  block name=block
+    $ref: [minCardinality, maxCardinality, description, title, name, nameIsPattern]
+    $ref: anyNodeOrGroup
+    $ref: ref
+
+// attr
+definition name=attr
+  block name=attr
+    $ref: [minCardinality, maxCardinality, description, title, name, nameIsPattern]
+    block name=$ref: { type: string, minLength: 1 }
+    value: { $ref: anyType }
+
+definition name=name
+  attr name=name: { type: string, minLength: 1 }
+definition name=nameIsPattern
+  attr name=nameIsPattern min=0 max=1: { type: boolean, default: false }
+
+// value
+definition name=value
+  block name=value
+    $ref: [minCardinality, maxCardinality, description, title]
+    value: { $ref: anyType }
+
+// definition
+definition name=definition
+  block name=definition
+    attr name=name: { type: string, minLength: 1 }
+    block name=value
+      value: { $ref: anyType }
+
+// $ref
+
+definition name=anyGroup
+  oneOf
+    $ref: [oneOf, sorted, unsorted]
+
+definition name=anyNode
+  oneOf
+    $ref: [block, attr, value]
+
+definition name=anyNodeOrGroup
+  oneOf
+    $ref: [anyNode, anyGroup]
+
+definition name=minCardinality
+  attr name=min min=0 max=1: { type: number, min: 0, step: 1, default: 0 }
+definition name=maxCardinality
+  attr name=max min=0 max=1: { type: number, min: 1, step: 1, default: 'unbound' }
+definition name=description
+  attr name=description min=0 max=1: { type: string }
+definition name=title
+  attr name=title min=0 max=1: { type: string }
+
+// value types
+definition name=refType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: ref }
+      name: { type: string }
+    },
+    required: [ 'type', 'name' ]
+  }
+
+definition name=stringType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: string }
+      minLength: { type: number, min: 0, step: 1, default: 0 }
+      maxLength: { type: number, min: 1, step: 1, default: 'unbound' }
+      format: { type: string, enum: [ 'email', 'url' ] }
+      pattern: { type: string }
+    },
+    required: [ 'type' ]
+  }
+
+definition name=numberType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: number }
+      min: { type: number, min: 'unbound', default: 'unbound' }
+      max: { type: number, min: 1, default: 'unbound' }
+      step: { type: number }
+    },
+    required: [ 'type' ]
+  }
+
+definition name=booleanType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: boolean }
+    },
+    required: [ 'type' ]
+  }
+
+definition name=arrayType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: array }
+      element: { $ref: anyType }
+      minItems: { type: number, min: 0, step: 1, default: 0 }
+      maxItems: { type: number, min: 0, step: 1, default: 'unbound' }
+      uniqueItems: { type: boolean, default: false }
+    },
+    required: [ 'type', 'element' ]
+  }
+
+definition name=objectType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: object }
+      fields: {
+        type: object
+        fields: {
+          '.+': { $ref: anyType }
+        },
+        patternFields: ['.+']
+      }
+      minFields: { type: number, min: 0, step: 1, default: 0 }
+      maxFields: { type: number, min: 0, step: 1, default: 'unbound' }
+      required: {
+        type: array,
+        element: { $ref: anyType }
+      }
+      patternFields: {
+        type: array
+        element: { type: string }
+      }
+    },
+    required: [ 'type', 'fields' ]
+  }
+
+definition name=constType
+  value: {
+    type: object
+    fields: {
+      type: { type: const, value: const }
+      value: { $ref: anyType }
+    },
+    required: [ 'type', 'value' ]
+  }
+
+definition name=enumType
+  value: {
+    type: enum
+    fields: {
+      type: { type: const, value: enum }
+      values: {
+        type: array
+        element: { $ref: anyType }
+      }
+    },
+    required: [ 'type', 'values' ]
+  }
+
+definition name=ref
+  block name=$ref min=0 max=unbound
+    oneOf
+      value: { type: string, minLength: 1 }
+      value: { type: array, minItems: 1, element: { type: string, minLength: 1 } }
+
+// value constraints
+definition name=anyType
+  oneOf
+    $ref: [
+      refType,
+      stringType,
+      numberType,
+      booleanType,
+      arrayType,
+      objectType,
+      constType,
+      enumType
+    ]
