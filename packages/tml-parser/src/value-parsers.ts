@@ -5,8 +5,8 @@ import {
   NumberValue,
   ObjectField,
   Position,
-  PositionedArrayValue,
-  PositionedObjectValue,
+  ArrayValue,
+  ObjectValue,
   StringValue,
   Value,
 } from '@/types'
@@ -144,7 +144,7 @@ export function parseValue(value: string, position?: Position): Value {
 export function parseObjectValue(
   value: string,
   position?: Position
-): PositionedObjectValue {
+): ObjectValue {
   const fields: Array<ObjectField | CommentNode> = []
   let content = value.trim().slice(1, -1).trim()
 
@@ -390,7 +390,7 @@ export function parseObjectValue(
 export function parseArrayValue(
   value: string,
   position?: Position
-): PositionedArrayValue {
+): ArrayValue {
   const elements: Array<ArrayElement | CommentNode> = []
   let content = value.trim().slice(1, -1).trim()
 

@@ -8,8 +8,8 @@ import {
   StringValue,
   NumberValue,
   BooleanValue,
-  PositionedArrayValue,
-  PositionedObjectValue,
+  ArrayValue,
+  ObjectValue,
   ArrayElement,
   ObjectField,
 } from '@typedml/parser/types'
@@ -529,7 +529,7 @@ function stringifyBooleanValue(
  * Stringifies an array value
  */
 function stringifyArrayValue(
-  value: PositionedArrayValue,
+  value: ArrayValue,
   options: StringifyOptions,
   indentLevel: number = 0
 ): string {
@@ -618,7 +618,7 @@ function stringifyArrayValue(
  * Stringifies an object value
  */
 function stringifyObjectValue(
-  value: PositionedObjectValue,
+  value: ObjectValue,
   options: StringifyOptions,
   indentLevel: number = 0
 ): string {

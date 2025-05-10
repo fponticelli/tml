@@ -1,12 +1,53 @@
-import { BlockNode, Node, Value, ValueNode, Position } from '@/types'
+import { BlockNode, Node, Value, ValueNode, Position, Attribute } from '@/types'
 import { createPosition } from './position'
 import { parseValue } from './value-parsers'
 import { parseLine } from './line-parser'
 
+export type ParseTMLOptions = {
+  hydrateParents?: boolean
+}
+
+function runHydrateParents(nodes: Node[]) {
+  function runAttribute(value: Value, attr: Attribute) {
+    value.parent = attr
+  }
+  function runBlock(nodes: Node[], parent: BlockNode | undefined) {
+    for (const node of nodes) {
+      node.parent = parent
+      if (node.type === 'Block') {
+        runBlock(node.children, node)
+      } else if (node.type === 'Attribute') {
+        runAttribute(node.value, node)
+      } else if (node.type === 'Comment') {
+        // do nothing
+      } else if (node.type === 'Value') {
+        // do nothing
+      }
+    }
+  }
+
+  function run(nodes: Node[]) {
+    for (const node of nodes) {
+      if (node.type === 'Block') {
+        runBlock(node.children, node)
+      } else if (node.type === 'Attribute') {
+        runAttribute(node.value, node)
+      } else if (node.type === 'Comment') {
+        // do nothing
+      } else if (node.type === 'Value') {
+        // do nothing
+      }
+    }
+  }
+
+  run(nodes)
+}
+
 /**
  * Main parser function that converts a TML string into an AST.
  */
-export function parseTML(input: string): Node[] {
+export function parseTML(input: string, options: ParseTMLOptions = {}): Node[] {
+  const { hydrateParents = true } = options
   // Handle empty input
   if (!input.trim()) {
     return []
@@ -343,6 +384,10 @@ export function parseTML(input: string): Node[] {
     } else {
       stack[stack.length - 1].node.children.push(commentNode)
     }
+  }
+
+  if (hydrateParents) {
+    runHydrateParents(root)
   }
 
   return root
