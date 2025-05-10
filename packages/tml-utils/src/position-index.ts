@@ -96,6 +96,8 @@ export class PositionIndex {
       if (node.type === 'Value') {
         const valueNode = node as ValueNode
 
+        if (valueNode.position == null) return
+
         // Always index the value node itself with its position
         // This is now guaranteed to exist since we made position required
         const nodeRangeSize = this.calculateRangeSize(valueNode.position)
