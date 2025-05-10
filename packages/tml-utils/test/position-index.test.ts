@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseTML } from '@typedml/parser'
-import {
-  BlockNode,
-  Attribute,
-} from '@typedml/parser'
+import { BlockNode, Attribute } from '@typedml/parser'
 import {
   findNodeAtPosition,
   findNodeAtPositionWithIndex,

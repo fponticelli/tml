@@ -9,6 +9,7 @@ This document defines the schema format for TML (Typed Markup Language), specify
 TML schemas are composed of nodes of three primary types: `block`, `attr`, and `value`. Each node can have constraints on its name, cardinality, type, and content.
 
 ### Common Attributes
+
 - **min** (integer): Minimum occurrences of the node. Defaults to `1` if `nameIsPattern` is `false`, otherwise `0`.
 - **max** (integer or `'unbound'`): Maximum occurrences of the node. Defaults to `1` if `nameIsPattern` is `false`, otherwise `'unbound'`.
 - **description**: An optional description of the node purpose and content.
