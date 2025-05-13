@@ -48,8 +48,10 @@ function findNodeAtPosition(
  */
 function getHoverInfo(
   node: Node,
+  // eslint-disable-next-line no-unused-vars
   _document: vscode.TextDocument,
-  allNodes: Node[]
+  // eslint-disable-next-line no-unused-vars
+  _allNodes: Node[]
 ): vscode.MarkdownString | undefined {
   const markdown = new vscode.MarkdownString()
 

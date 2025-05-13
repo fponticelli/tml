@@ -50,24 +50,46 @@ function buildAndCopyPackage(packageName, packageNamespace) {
     fs.mkdirSync(distDir, { recursive: true });
   }
 
-  // Copy dist files
+  // Copy dist files recursively
   const srcDistDir = path.resolve(packagePath, 'dist');
-  const files = fs.readdirSync(srcDistDir);
-  for (const file of files) {
-    const srcFile = path.resolve(srcDistDir, file);
-    const destFile = path.resolve(distDir, file);
 
-    // Skip if not a regular file (e.g., socket, directory)
-    try {
-      const stats = fs.statSync(srcFile);
-      if (stats.isFile()) {
-        fs.copyFileSync(srcFile, destFile);
-      } else {
-        console.log(`Skipping non-file: ${srcFile}`);
-      }
-    } catch (err) {
-      console.warn(`Warning: Could not copy ${srcFile}: ${err.message}`);
+  /**
+   * Recursively copies files from source to destination
+   * @param {string} src - Source directory
+   * @param {string} dest - Destination directory
+   */
+  function copyRecursive(src, dest) {
+    // Create destination directory if it doesn't exist
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
     }
+
+    // Read all files/directories in the source
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const srcPath = path.join(src, entry.name);
+      const destPath = path.join(dest, entry.name);
+
+      if (entry.isDirectory()) {
+        // Recursively copy directories
+        copyRecursive(srcPath, destPath);
+      } else {
+        // Copy files
+        try {
+          fs.copyFileSync(srcPath, destPath);
+        } catch (err) {
+          console.warn(`Warning: Could not copy ${srcPath}: ${err.message}`);
+        }
+      }
+    }
+  }
+
+  // Start recursive copy
+  try {
+    copyRecursive(srcDistDir, distDir);
+  } catch (err) {
+    console.warn(`Warning: Could not copy files from ${srcDistDir}: ${err.message}`);
   }
 
   console.log(`Copied ${packageName} package from ${packagePath} to ${packageDestPath}`);
