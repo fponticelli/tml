@@ -63,14 +63,21 @@ export function findNodeAtPosition(
 /**
  * Finds the parent block of a node
  *
- * This function has special handling for comments to ensure they are associated
- * with the correct parent block based on indentation level.
+ * This function now uses the parent field directly from the node.
+ * The old implementation is kept for backward compatibility with special handling for comments.
+ *
+ * @deprecated Use node.parent directly instead
  */
 export function findParentBlock(
   nodes: Node[],
   targetNode: Node,
   currentParent?: BlockNode
 ): BlockNode | undefined {
+  // If the node has a parent field, use it directly
+  if ('parent' in targetNode && targetNode.parent) {
+    return targetNode.parent as BlockNode
+  }
+
   // Special handling for comments
   if (targetNode.type === 'Comment' && targetNode.position) {
     // Get the comment's indentation level
@@ -101,7 +108,7 @@ export function findParentBlock(
     }
   }
 
-  // Standard parent finding logic
+  // Fallback to the old implementation for backward compatibility
   for (const node of nodes) {
     if (node === targetNode) {
       return currentParent

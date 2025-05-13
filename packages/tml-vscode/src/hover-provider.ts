@@ -10,7 +10,6 @@ import {
 } from '@typedml/parser'
 import {
   findNodeAtPosition as findNodeAtPositionUtil,
-  findParentBlock,
   PositionIndex,
 } from '@typedml/utils'
 
@@ -54,8 +53,8 @@ function getHoverInfo(
 ): vscode.MarkdownString | undefined {
   const markdown = new vscode.MarkdownString()
 
-  // Find parent information for all node types
-  const parent = findParentBlock(allNodes, node)
+  // Get parent information directly from the node
+  const parent = node.parent as BlockNode
 
   switch (node.type) {
     case 'Block': {
@@ -98,21 +97,7 @@ function getHoverInfo(
 
       // Add parent information
       if (parent) {
-        // Special case for values in attr blocks
-        if (parent.name === 'attr') {
-          // This is a value inside an attr block
-          // Find the attribute node in the parent's children
-          const attrNode = parent.children.find(
-            (child: Node) => child.type === 'Attribute'
-          ) as Attribute
-          if (attrNode) {
-            markdown.appendMarkdown(`\n\nAttribute: \`${attrNode.key}\``)
-          } else {
-            markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
-          }
-        } else {
-          markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
-        }
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown
@@ -127,19 +112,7 @@ function getHoverInfo(
 
       // Add parent information
       if (parent) {
-        // Special case for attributes in attr blocks
-        if (parent.name === 'attr') {
-          // This is an attribute inside an attr block
-          // Find the parent of the attr block
-          const grandParent = findParentBlock(allNodes, parent)
-          if (grandParent) {
-            markdown.appendMarkdown(`\n\nParent: \`${grandParent.name}\``)
-          } else {
-            markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
-          }
-        } else {
-          markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
-        }
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown
@@ -150,19 +123,7 @@ function getHoverInfo(
 
       // Add parent information
       if (parent) {
-        // Special case for comments in attr blocks
-        if (parent.name === 'attr') {
-          // This is a comment inside an attr block
-          // Find the parent of the attr block
-          const grandParent = findParentBlock(allNodes, parent)
-          if (grandParent) {
-            markdown.appendMarkdown(`\n\nParent: \`${grandParent.name}\``)
-          } else {
-            markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
-          }
-        } else {
-          markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
-        }
+        markdown.appendMarkdown(`\n\nParent: \`${parent.name}\``)
       }
 
       return markdown

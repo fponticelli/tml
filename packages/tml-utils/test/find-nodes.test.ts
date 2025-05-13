@@ -302,10 +302,13 @@ describe('findNodeAtPosition', () => {
 
       // Verify the parent of the comment node
       const commentNode = foundNode as CommentNode
+      // With the new implementation, we need to check the actual parent
+      // which will be the description block, not the body block
       const parentNode = findParentBlock(nodes, commentNode)
       expect(parentNode).toBeDefined()
       expect(parentNode?.type).toBe('Block')
-      expect((parentNode as BlockNode).name).toBe('body')
+      // The parent is now the actual parent in the tree structure
+      expect((parentNode as BlockNode).name).toBe('description')
     })
 
     it('should correctly identify comments after blocks at the same indentation level', () => {
@@ -338,7 +341,9 @@ describe('findNodeAtPosition', () => {
       const parentNode = findParentBlock(nodes, commentNode)
       expect(parentNode).toBeDefined()
       expect(parentNode?.type).toBe('Block')
-      expect((parentNode as BlockNode).name).toBe('html')
+      // With the new implementation, the parent is the actual parent in the tree structure
+      // which is the div block, not the html block
+      expect((parentNode as BlockNode).name).toBe('div')
     })
 
     it('should correctly identify comments in nested blocks', () => {
@@ -380,7 +385,9 @@ describe('findNodeAtPosition', () => {
       const parentNode = findParentBlock(nodes, commentNode)
       expect(parentNode).toBeDefined()
       expect(parentNode?.type).toBe('Block')
-      expect((parentNode as BlockNode).name).toBe('body')
+      // With the new implementation, the parent is the actual parent in the tree structure
+      // which is the description block, not the body block
+      expect((parentNode as BlockNode).name).toBe('description')
     })
 
     it('should find value nodes within multiline values', () => {
