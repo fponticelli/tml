@@ -169,6 +169,38 @@ export type ObjectValue = ID<
 >
 
 /**
+ * Represents a structured array with position information, preserving element order and positions.
+ * This is an extension of ArrayValue that ensures position information is available.
+ * @property type - Discriminator for the node type ("Array")
+ * @property elements - Mixed list of values and comments.
+ * @property position - Location in the source file.
+ * @property parent - A reference to the parent Block if any.
+ */
+export type PositionedArrayValue = ID<
+  {
+    type: 'Array'
+    elements: Array<ArrayElement | CommentNode>
+    position: Position // Position is required, not optional
+  } & BaseValue
+>
+
+/**
+ * Represents a structured object with position information, preserving field order and comments.
+ * This is an extension of ObjectValue that ensures position information is available.
+ * @property type - Discriminator for the node type ("Object")
+ * @property fields - Mixed list of fields and comments.
+ * @property position - Location in the source file.
+ * @property parent - A reference to the parent Block if any.
+ */
+export type PositionedObjectValue = ID<
+  {
+    type: 'Object'
+    fields: Array<ObjectField | CommentNode>
+    position: Position // Position is required, not optional
+  } & BaseValue
+>
+
+/**
  * Value type for all supported TML values: primitive, object, or array.
  */
 export type Value = ObjectValue | ArrayValue | PrimitiveValue
