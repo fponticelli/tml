@@ -19,23 +19,23 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.8.0",
-    "@commitlint/config-conventional": "19.8.0",
-    "@eslint/js": "9.26.0",
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
+    "@eslint/js": "9.27.0",
     "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/git": "10.0.1",
     "@semantic-release/github": "11.0.2",
     "@semantic-release/npm": "12.0.1",
     "@semantic-release/release-notes-generator": "14.0.3",
-    "commitlint": "19.8.0",
-    "eslint": "9.26.0",
-    "globals": "16.0.0",
+    "commitlint": "19.8.1",
+    "eslint": "9.27.0",
+    "globals": "16.1.0",
     "husky": "9.1.7",
     "prettier": "3.5.3",
-    "semantic-release": "24.2.3",
-    "turbo": "2.5.2",
+    "semantic-release": "24.2.4",
+    "turbo": "2.5.3",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.32.0"
+    "typescript-eslint": "8.32.1"
   },
   "engines": {
     "node": "22.x"
