@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "packageManager": "yarn@1.22.19",
+  "packageManager": "yarn@1.22.22",
   "workspaces": [
     "packages/*"
   ],
@@ -16,7 +16,9 @@
     "test": "turbo run test",
     "format:fix": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format": "prettier --check \"**/*.{ts,tsx,md,json}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "reset": "yarn clean && yarn install"
   },
   "devDependencies": {
     "@commitlint/cli": "19.8.1",

@@ -1,9 +1,15 @@
-# Run linting, formatting, and tests before committing
-echo "Running lint checks..."
-yarn lint
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
+# Setup environment (PATH, nvm, etc.)
+. "$(dirname -- "$0")/setup-env.sh"
+
+# Run formatting, linting, and tests before committing
 echo "Running format checks..."
 yarn format
+
+echo "Running lint checks..."
+yarn lint
 
 echo "Running tests..."
 yarn test

@@ -6,11 +6,13 @@ This is a monorepo for the Typed Markup Language (TML) ecosystem.
 
 This project uses pre-commit hooks to ensure code quality. The hooks run:
 
-- Linting
-- Formatting
-- Tests
+- Linting (`yarn lint`)
+- Formatting (`yarn format`)
+- Tests (`yarn test`)
 
-These checks run automatically when you commit changes.
+These checks run automatically when you commit changes. The hooks are configured to work from VS Code and other editors by automatically setting up the correct PATH environment.
+
+**Note**: If you experience "yarn not found" errors when committing from VS Code, see the [Package Manager Documentation](./docs/package-manager.md#troubleshooting) for solutions.
 
 ### CI/CD
 
@@ -37,12 +39,17 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 ## Development
 
-This monorepo uses [Turborepo](https://turbo.build/repo) for managing the build process.
+This monorepo uses [Turborepo](https://turbo.build/repo) for managing the build process and **Yarn v1** as the package manager.
+
+### Prerequisites
+
+- Node.js 22.x (see `.nvmrc`)
+- Yarn v1.22.22 (enforced via `packageManager` field)
 
 ### Setup
 
 ```bash
-# Install dependencies
+# Install dependencies (Yarn is enforced - npm/pnpm will be rejected)
 yarn install
 
 # Build all packages
@@ -53,6 +60,14 @@ yarn test
 
 # Development mode
 yarn dev
+
+# Lint and format
+yarn lint
+yarn format
+
+# Clean and reset
+yarn clean    # Remove all build artifacts and node_modules
+yarn reset    # Clean + fresh install
 ```
 
 ## License
