@@ -27,14 +27,14 @@
     "@typedml/parser": "*"
   },
   "devDependencies": {
-    "@types/node": "22.15.30",
-    "@typescript-eslint/eslint-plugin": "8.34.0",
-    "@typescript-eslint/parser": "8.34.0",
-    "eslint": "9.28.0",
+    "@types/node": "24.0.10",
+    "@typescript-eslint/eslint-plugin": "8.36.0",
+    "@typescript-eslint/parser": "8.36.0",
+    "eslint": "9.30.1",
     "typescript": "5.8.3",
-    "vite": "^6.3.5",
+    "vite": "^7.0.2",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^3.2.3"
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "22.x"
