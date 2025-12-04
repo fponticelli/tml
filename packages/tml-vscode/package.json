@@ -62,11 +62,11 @@
     "@typedml/utils": "*"
   },
   "devDependencies": {
-    "@types/node": "22.15.30",
-    "@types/vscode": "1.100.0",
-    "@vscode/vsce": "3.5.0",
-    "typescript": "5.8.3",
+    "@types/node": "24.10.1",
+    "@types/vscode": "1.106.1",
+    "@vscode/vsce": "3.7.1",
+    "typescript": "5.9.3",
     "vite": "7.2.6",
-    "vite-plugin-node": "5.0.1"
+    "vite-plugin-node": "7.0.0"
   }
 }
