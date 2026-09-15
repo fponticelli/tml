@@ -7,9 +7,12 @@
       "outputs": ["dist/**", "out/**", "*.vsix"]
     },
     "lint": {
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "lint:fix": {
+      "dependsOn": ["^build"],
+      "cache": false,
       "outputs": []
     },
     "dev": {

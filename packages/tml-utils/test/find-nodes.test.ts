@@ -224,7 +224,7 @@ describe('findNodeAtPosition', () => {
       expect(node4?.type).toBe('Value')
     })
 
-    it.skip('should find nodes in structured values', () => {
+    it('should find nodes in structured values', () => {
       const tml = `config: {
   name: "My App",
   version: 1.0,
@@ -250,7 +250,7 @@ describe('findNodeAtPosition', () => {
       expect(node2?.type).toBe('Value')
     })
 
-    it.skip('should find nodes in array values', () => {
+    it('should find nodes in array values', () => {
       const tml = `items: [
   "Item 1",
   "Item 2",

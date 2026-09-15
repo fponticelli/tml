@@ -11,7 +11,7 @@
     "url": "https://github.com/fponticelli/tml.git"
   },
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.137.0"
   },
   "main": "./out/extension.js",
   "activationEvents": [
@@ -50,7 +50,9 @@
     "build": "yarn prepare-package && yarn build:prod && npx @vscode/vsce package",
     "test": "echo \"No tests yet\"",
     "extension:install": "code --uninstall-extension tml.tml-vscode & code --install-extension tml-vscode-0.0.1.vsix",
-    "clean": "rm -rf out *.vsix"
+    "clean": "rm -rf out *.vsix",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix"
   },
   "vsce": {
     "dependencies": true,
@@ -62,11 +64,12 @@
     "@typedml/utils": "*"
   },
   "devDependencies": {
-    "@types/node": "22.15.30",
-    "@types/vscode": "1.100.0",
-    "@vscode/vsce": "3.5.0",
-    "typescript": "5.8.3",
+    "@types/node": "26.5.1",
+    "@types/vscode": "1.137.0",
+    "@vscode/vsce": "4.0.0",
+    "oxlint": "1.83.0",
+    "typescript": "7.0.2",
     "vite": "8.3.0",
-    "vite-plugin-node": "5.0.1"
+    "vite-plugin-node": "8.0.0"
   }
 }

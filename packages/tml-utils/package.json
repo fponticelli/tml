@@ -16,27 +16,24 @@
   ],
   "scripts": {
     "dev": "vite build --watch",
-    "build": "tsc && vite build",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src test --ext ts",
-    "lint:fix": "eslint src test --ext ts --fix --fix-type problem,suggestion,layout",
-    "clean": "rm -rf dist"
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@typedml/parser": "*"
   },
   "devDependencies": {
-    "@types/node": "22.15.30",
-    "@typescript-eslint/eslint-plugin": "8.34.0",
-    "@typescript-eslint/parser": "8.34.0",
-    "eslint": "9.28.0",
-    "typescript": "5.8.3",
-    "vite": "^8.3.0",
-    "vite-plugin-dts": "^4.5.4",
-    "vitest": "^5.0.0"
+    "@types/node": "26.5.1",
+    "oxlint": "1.83.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.0",
+    "vitest": "5.0.0"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=22.14.0"
   }
 }

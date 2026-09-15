@@ -12,7 +12,7 @@ import {
   ObjectValue,
   ArrayElement,
   ObjectField,
-} from '@typedml/parser/types'
+} from '@typedml/parser'
 
 /**
  * Options for stringifying TML

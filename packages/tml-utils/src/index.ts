@@ -7,10 +7,10 @@ export {
   isPositionInRange,
   type PositionLike,
   type RangeLike,
-} from '@/find-nodes'
+} from './find-nodes'
 
 // Export position-index functions and classes
-export { PositionIndex, findNodeAtPositionWithIndex } from '@/position-index'
+export { PositionIndex, findNodeAtPositionWithIndex } from './position-index'
 
 // Export stringify functions
-export { stringifyTML, type StringifyOptions } from '@/stringify'
+export { stringifyTML, type StringifyOptions } from './stringify'

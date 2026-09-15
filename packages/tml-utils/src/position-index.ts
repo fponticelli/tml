@@ -4,7 +4,7 @@ import {
   ValueNode,
   Attribute,
   Position,
-} from '@typedml/parser/types'
+} from '@typedml/parser'
 import { PositionLike, isPositionInRange } from './find-nodes'
 
 /**

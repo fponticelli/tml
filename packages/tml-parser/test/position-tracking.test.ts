@@ -517,8 +517,7 @@ describe('Position Tracking in TML Parser', () => {
 }`
 
       const result = parseTML(input)
-      // The parser might parse this differently, just check that we get a result
-      expect(result.length).toBeGreaterThan(0)
+      expect(result.length).toBe(1)
 
       // Find the config block
       const block = result.find(
@@ -532,38 +531,25 @@ describe('Position Tracking in TML Parser', () => {
       expect(valueNode).toBeDefined()
 
       if (valueNode) {
+        // The value starts at the colon and ends at the closing brace
         const valuePosition = assertPositionExists(valueNode)
-        // The position should span from line 1 to line 5
-        // Just check that the position exists and spans multiple lines
-        expect(valuePosition.start.line).toBe(1)
-        expect(valuePosition.end.line).toBe(1)
+        assertPosition(valuePosition, 1, 6, 5, 1)
 
-        // The parser might parse this as a string or an object
-        // Just check that the value exists
-        expect(valueNode.value).toBeDefined()
+        expect(valueNode.value.type).toBe('Object')
         const objValue = valueNode.value as PositionedObjectValue
-        const objPosition = assertPositionExists(objValue)
-        // Just check that the position exists and spans multiple lines
-        expect(objPosition.start.line).toBe(1)
-        expect(objPosition.end.line).toBe(1)
+        assertPosition(assertPositionExists(objValue), 1, 6, 5, 1)
 
-        // Skip checking fields if it's not an object
-        if (valueNode.value.type === 'Object') {
-          // Check field positions
-          expect(objValue.fields.length).toBe(3)
+        // Each field carries the span of its own line
+        expect(objValue.fields.length).toBe(3)
 
-          const nameField = objValue.fields[0] as ObjectField
-          const nameFieldPosition = assertPositionExists(nameField)
-          assertPosition(nameFieldPosition, 2, 2, 2, 15)
+        const nameField = objValue.fields[0] as ObjectField
+        assertPosition(assertPositionExists(nameField), 2, 2, 2, 16)
 
-          const versionField = objValue.fields[1] as ObjectField
-          const versionFieldPosition = assertPositionExists(versionField)
-          assertPosition(versionFieldPosition, 3, 2, 3, 14)
+        const versionField = objValue.fields[1] as ObjectField
+        assertPosition(assertPositionExists(versionField), 3, 2, 3, 14)
 
-          const enabledField = objValue.fields[2] as ObjectField
-          const enabledFieldPosition = assertPositionExists(enabledField)
-          assertPosition(enabledFieldPosition, 4, 2, 4, 15)
-        }
+        const enabledField = objValue.fields[2] as ObjectField
+        assertPosition(assertPositionExists(enabledField), 4, 2, 4, 15)
       }
     })
 
@@ -575,8 +561,7 @@ describe('Position Tracking in TML Parser', () => {
 ]`
 
       const result = parseTML(input)
-      // The parser might parse this differently, just check that we get a result
-      expect(result.length).toBeGreaterThan(0)
+      expect(result.length).toBe(1)
 
       // Find the items block
       const block = result.find(
@@ -590,38 +575,25 @@ describe('Position Tracking in TML Parser', () => {
       expect(valueNode).toBeDefined()
 
       if (valueNode) {
+        // The value starts at the colon and ends at the closing bracket
         const valuePosition = assertPositionExists(valueNode)
-        // The position should span from line 1 to line 5
-        // Just check that the position exists and spans multiple lines
-        expect(valuePosition.start.line).toBe(1)
-        expect(valuePosition.end.line).toBe(1)
+        assertPosition(valuePosition, 1, 5, 5, 1)
 
-        // The parser might parse this as a string or an array
-        // Just check that the value exists
-        expect(valueNode.value).toBeDefined()
+        expect(valueNode.value.type).toBe('Array')
         const arrValue = valueNode.value as PositionedArrayValue
-        const arrPosition = assertPositionExists(arrValue)
-        // Just check that the position exists and spans multiple lines
-        expect(arrPosition.start.line).toBe(1)
-        expect(arrPosition.end.line).toBe(1)
+        assertPosition(assertPositionExists(arrValue), 1, 5, 5, 1)
 
-        // Skip checking elements if it's not an array
-        if (valueNode.value.type === 'Array') {
-          // Check element positions
-          expect(arrValue.elements.length).toBe(3)
+        // Each element carries the span of its own line
+        expect(arrValue.elements.length).toBe(3)
 
-          const element1 = arrValue.elements[0] as ArrayElement
-          const element1Position = assertPositionExists(element1)
-          assertPosition(element1Position, 2, 2, 2, 10)
+        const element1 = arrValue.elements[0] as ArrayElement
+        assertPosition(assertPositionExists(element1), 2, 2, 2, 10)
 
-          const element2 = arrValue.elements[1] as ArrayElement
-          const element2Position = assertPositionExists(element2)
-          assertPosition(element2Position, 3, 2, 3, 10)
+        const element2 = arrValue.elements[1] as ArrayElement
+        assertPosition(assertPositionExists(element2), 3, 2, 3, 10)
 
-          const element3 = arrValue.elements[2] as ArrayElement
-          const element3Position = assertPositionExists(element3)
-          assertPosition(element3Position, 4, 2, 4, 10)
-        }
+        const element3 = arrValue.elements[2] as ArrayElement
+        assertPosition(assertPositionExists(element3), 4, 2, 4, 10)
       }
     })
   })

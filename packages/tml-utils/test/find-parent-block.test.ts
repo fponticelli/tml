@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseTML } from '@typedml/parser'
-import { BlockNode, ValueNode, Attribute } from '@typedml/parser/types'
+import { BlockNode, ValueNode, Attribute } from '@typedml/parser'
 import { findNodeAtPosition, findParentBlock } from '../src'
 
 describe('findParentBlock', () => {

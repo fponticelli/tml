@@ -1,4 +1,4 @@
-import { Point, Position } from '@/types'
+import { Point, Position } from './types'
 
 /**
  * Creates a Point object representing a position in the source.

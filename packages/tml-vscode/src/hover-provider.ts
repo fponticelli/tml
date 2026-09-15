@@ -241,7 +241,8 @@ export class TMLHoverProvider implements vscode.HoverProvider {
     } catch (error) {
       // Use the existing error channel
       this.errorChannel.clear()
-      this.errorChannel.appendLine(`Error in hover provider: ${error}`)
+      const message = error instanceof Error ? error.message : String(error)
+      this.errorChannel.appendLine(`Error in hover provider: ${message}`)
       if (error instanceof Error) {
         this.errorChannel.appendLine(error.stack || 'No stack trace available')
       }

@@ -1,7 +1,84 @@
-import { BlockNode, Node, Value, ValueNode, Position, Attribute } from '@/types'
+import { BlockNode, Node, Value, ValueNode, Position, Attribute } from './types'
 import { createPosition } from './position'
 import { parseValue } from './value-parsers'
 import { parseLine } from './line-parser'
+import {
+  BracketState,
+  createBracketState,
+  opensBracketSpan,
+  scanBrackets,
+} from './bracket-scan'
+
+type BracketSpan = {
+  startLine: number
+  startIndent: number
+  lines: string[]
+  state: BracketState
+}
+
+/**
+ * Turns a `{}` / `[]` value that spans several lines into a single node.
+ * `name: { ... }` becomes a block holding one value; a bare `{ ... }` becomes
+ * a standalone value.
+ */
+function buildBracketSpanNode(
+  span: BracketSpan,
+  endLine: number,
+  endColumn: number
+): Node {
+  const text = span.lines.join('\n')
+  const trimmedFirstLine = span.lines[0].trim()
+  const colonIndex = trimmedFirstLine.indexOf(':')
+
+  // A bare `{ ... }` or `[ ... ]` with no block name in front of it
+  if (colonIndex <= 0) {
+    const position = createPosition(
+      span.startLine,
+      span.startIndent,
+      endLine,
+      endColumn
+    )
+
+    return {
+      type: 'Value',
+      value: parseValue(text, position, {
+        line: span.startLine,
+        column: 0,
+      }),
+      position,
+      isMultiline: true,
+    }
+  }
+
+  const valueColumn = span.startIndent + colonIndex
+  const valuePosition = createPosition(
+    span.startLine,
+    valueColumn,
+    endLine,
+    endColumn
+  )
+  const valueNode: ValueNode = {
+    type: 'Value',
+    value: parseValue(text.substring(valueColumn + 1), valuePosition, {
+      line: span.startLine,
+      column: valueColumn + 1,
+    }),
+    position: valuePosition,
+    isMultiline: true,
+  }
+
+  return {
+    type: 'Block',
+    name: trimmedFirstLine.substring(0, colonIndex),
+    children: [valueNode],
+    position: createPosition(
+      span.startLine,
+      span.startIndent,
+      endLine,
+      endColumn
+    ),
+  }
+}
 
 export type ParseTMLOptions = {
   hydrateParents?: boolean
@@ -113,6 +190,9 @@ export function parseTML(input: string, options: ParseTMLOptions = {}): Node[] {
     lines: string[]
   } | null = null
 
+  // Track a value that spans several lines inside {} or []
+  let collectingBracketSpan: BracketSpan | null = null
+
   // Track multiline block comment collection
   let collectingBlockComment: {
     startLine: number
@@ -131,6 +211,47 @@ export function parseTML(input: string, options: ParseTMLOptions = {}): Node[] {
       if (collectingBlockComment) {
         collectingBlockComment.lines.push('')
       }
+      if (collectingBracketSpan) {
+        collectingBracketSpan.lines.push('')
+      }
+      continue
+    }
+
+    // Keep collecting a value that spans several lines inside {} or []
+    if (collectingBracketSpan) {
+      collectingBracketSpan.lines.push(line)
+      collectingBracketSpan.state = scanBrackets(
+        line,
+        collectingBracketSpan.state
+      )
+
+      if (collectingBracketSpan.state.depth > 0) {
+        continue
+      }
+
+      const { closeColumn } = collectingBracketSpan.state
+      const node = buildBracketSpanNode(
+        collectingBracketSpan,
+        lineNumber,
+        closeColumn >= 0 ? closeColumn : line.length
+      )
+      const spanIndent = collectingBracketSpan.startIndent
+      collectingBracketSpan = null
+
+      while (stack.length > 0 && spanIndent <= stack[stack.length - 1].indent) {
+        stack.pop()
+      }
+
+      if (stack.length === 0) {
+        root.push(node)
+      } else {
+        stack[stack.length - 1].node.children.push(node)
+      }
+
+      if (node.type === 'Block') {
+        stack.push({ indent: spanIndent, node })
+      }
+
       continue
     }
 
@@ -275,6 +396,21 @@ export function parseTML(input: string, options: ParseTMLOptions = {}): Node[] {
       }
     }
 
+    // Check if this line opens a value that continues on the lines below
+    if (opensBracketSpan(line.trim())) {
+      const state = scanBrackets(line, createBracketState())
+
+      if (state.depth > 0) {
+        collectingBracketSpan = {
+          startLine: lineNumber,
+          startIndent: indent,
+          lines: [line],
+          state,
+        }
+        continue
+      }
+    }
+
     // Check if this line is a block with a colon but no value (potential multiline value start)
     if (line.trim().endsWith(':')) {
       const { indent: blockIndent, node } = parseLine(line, lineNumber)
@@ -354,6 +490,30 @@ export function parseTML(input: string, options: ParseTMLOptions = {}): Node[] {
     }
 
     collectingValue.blockNode.children.push(valueNode)
+  }
+
+  // Process a span whose closing bracket never arrived
+  if (collectingBracketSpan) {
+    const lastLine =
+      collectingBracketSpan.lines[collectingBracketSpan.lines.length - 1]
+    const node = buildBracketSpanNode(
+      collectingBracketSpan,
+      collectingBracketSpan.startLine + collectingBracketSpan.lines.length - 1,
+      lastLine.length
+    )
+    const spanIndent = collectingBracketSpan.startIndent
+
+    while (stack.length > 0 && spanIndent <= stack[stack.length - 1].indent) {
+      stack.pop()
+    }
+
+    if (stack.length === 0) {
+      root.push(node)
+    } else {
+      stack[stack.length - 1].node.children.push(node)
+    }
+
+    collectingBracketSpan = null
   }
 
   // Process any remaining multiline block comment

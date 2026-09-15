@@ -1,4 +1,4 @@
-import { Node, BlockNode } from '@typedml/parser/types'
+import { Node, BlockNode } from '@typedml/parser'
 import { findNodeAtPositionWithIndex } from './position-index'
 
 /**

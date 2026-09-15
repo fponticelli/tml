@@ -1,4 +1,4 @@
-import { Attribute, CommentNode, ValueNode } from '@/types'
+import { Attribute, CommentNode, ValueNode } from './types'
 import { createLinePosition } from './position'
 import { parseValue } from './value-parsers'
 

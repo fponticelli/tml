@@ -4,12 +4,13 @@ import {
   CommentNode,
   NumberValue,
   ObjectField,
+  Point,
   Position,
   ArrayValue,
   ObjectValue,
   StringValue,
   Value,
-} from '@/types'
+} from './types'
 
 /**
  * Parses a string value, handling quotes and escapes.
@@ -109,19 +110,73 @@ export function isUnquotedString(value: string): boolean {
 }
 
 /**
+ * Where character zero of a value's text sits in the document. Object and
+ * array parsers need it to give each field or element a position of its own
+ * instead of reusing the position of the value that contains them.
+ */
+export type ValueOrigin = Point
+
+/**
+ * Maps an offset inside `text` to a document point, given where the text starts.
+ */
+export function offsetToPoint(
+  text: string,
+  offset: number,
+  origin: ValueOrigin
+): Point {
+  let { line, column } = origin
+
+  for (let i = 0; i < offset && i < text.length; i++) {
+    if (text[i] === '\n') {
+      line++
+      column = 0
+    } else {
+      column++
+    }
+  }
+
+  return { line, column }
+}
+
+/**
+ * Builds the position of the slice `text[start, end)`.
+ */
+function spanPosition(
+  text: string,
+  start: number,
+  end: number,
+  origin: ValueOrigin | undefined,
+  fallback: Position | undefined
+): Position | undefined {
+  if (!origin) return fallback
+
+  return {
+    start: offsetToPoint(text, start, origin),
+    end: offsetToPoint(text, end, origin),
+  }
+}
+
+/**
  * Determines the type of a value and parses it accordingly.
  */
-export function parseValue(value: string, position?: Position): Value {
+export function parseValue(
+  value: string,
+  position?: Position,
+  origin?: ValueOrigin
+): Value {
   const trimmed = value.trim()
+  const trimmedOrigin = origin
+    ? offsetToPoint(value, value.length - value.trimStart().length, origin)
+    : undefined
 
   // Check for object
   if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-    return parseObjectValue(trimmed, position)
+    return parseObjectValue(trimmed, position, trimmedOrigin)
   }
 
   // Check for array
   if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-    return parseArrayValue(trimmed, position)
+    return parseArrayValue(trimmed, position, trimmedOrigin)
   }
 
   // Check for boolean
@@ -143,65 +198,42 @@ export function parseValue(value: string, position?: Position): Value {
  */
 export function parseObjectValue(
   value: string,
-  position?: Position
+  position?: Position,
+  origin?: ValueOrigin
 ): ObjectValue {
   const fields: Array<ObjectField | CommentNode> = []
-  let content = value.trim().slice(1, -1).trim()
-
-  // Handle multiline objects by normalizing whitespace
-  if (content.includes('\n')) {
-    // Remove common indentation
-    const lines = content.split(/\r?\n/)
-    const indentations = lines
-      .filter(line => line.trim().length > 0)
-      .map(line => line.match(/^(\s*)/)?.[1].length || 0)
-
-    if (indentations.length > 0) {
-      const minIndent = Math.min(...indentations)
-      content = lines
-        .map(line => {
-          if (line.trim().length === 0) return ''
-          return line.substring(Math.min(minIndent, line.length))
-        })
-        .join(' ')
-        .trim()
-    } else {
-      content = lines.join(' ').trim()
-    }
-  }
+  const content = value.trim().slice(1, -1)
+  // Character zero of `content` is the one right after the opening brace
+  const contentOrigin = origin ? offsetToPoint(value, 1, origin) : undefined
 
   // Helper function to process a value for object fields
-  const processFieldValue = (key: string, value: string) => {
+  const processFieldValue = (
+    key: string,
+    value: string,
+    start: number,
+    end: number,
+    valueStart: number
+  ) => {
     if (!key) return
 
     const trimmedValue = value.trim()
+    const fieldPosition = spanPosition(
+      content,
+      start,
+      end,
+      contentOrigin,
+      position
+    )
+    const valueOrigin = contentOrigin
+      ? offsetToPoint(content, valueStart, contentOrigin)
+      : undefined
 
-    // Check if it's a nested array or object
-    if (trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) {
-      // It's a nested array
-      fields.push({
-        type: 'Field',
-        key,
-        value: parseArrayValue(trimmedValue, position),
-        position,
-      })
-    } else if (trimmedValue.startsWith('{') && trimmedValue.endsWith('}')) {
-      // It's a nested object
-      fields.push({
-        type: 'Field',
-        key,
-        value: parseObjectValue(trimmedValue, position),
-        position,
-      })
-    } else {
-      // It's a regular value
-      fields.push({
-        type: 'Field',
-        key,
-        value: parseValue(trimmedValue, position),
-        position,
-      })
-    }
+    fields.push({
+      type: 'Field',
+      key,
+      value: parseValue(trimmedValue, fieldPosition, valueOrigin),
+      position: fieldPosition,
+    })
   }
 
   // More robust parsing for nested structures
@@ -215,6 +247,11 @@ export function parseObjectValue(
     let inLineComment = false
     let inBlockComment = false
     let commentBuffer = ''
+    // Offsets of the field being collected, so it can carry its own position
+    let fieldStart = -1
+    let fieldEnd = -1
+    let valueStart = -1
+    let commentStart = -1
 
     for (let i = 0; i <= content.length; i++) {
       const char = i < content.length ? content[i] : ',' // Add a comma at the end to process the last field
@@ -225,6 +262,7 @@ export function parseObjectValue(
       if (!inQuote && !inBlockComment && char === '/' && nextChar === '/') {
         inLineComment = true
         commentBuffer = '//'
+        commentStart = i
         i++ // Skip the next slash
         continue
       }
@@ -232,6 +270,7 @@ export function parseObjectValue(
       if (!inQuote && !inLineComment && char === '/' && nextChar === '*') {
         inBlockComment = true
         commentBuffer = '/*'
+        commentStart = i
         i++ // Skip the next asterisk
         continue
       }
@@ -242,7 +281,13 @@ export function parseObjectValue(
           type: 'Comment',
           value: commentBuffer.slice(2).trim(),
           isLineComment: true,
-          position,
+          position: spanPosition(
+            content,
+            commentStart,
+            i,
+            contentOrigin,
+            position
+          ),
         })
         inLineComment = false
         commentBuffer = ''
@@ -257,7 +302,13 @@ export function parseObjectValue(
           type: 'Comment',
           value: commentBuffer.slice(2).trim(),
           isLineComment: false,
-          position,
+          position: spanPosition(
+            content,
+            commentStart,
+            i + 2,
+            contentOrigin,
+            position
+          ),
         })
         inBlockComment = false
         commentBuffer = ''
@@ -304,13 +355,14 @@ export function parseObjectValue(
       ) {
         currentKey = currentKey.trim()
         collectingKey = false
+        valueStart = i + 1
         continue
       }
 
       // Handle value separator (comma or whitespace followed by a new key)
       if (
         (char === ',' && inQuote === null && inObject === 0 && inArray === 0) ||
-        (char === ' ' &&
+        ((char === ' ' || char === '\n') &&
           inQuote === null &&
           inObject === 0 &&
           inArray === 0 &&
@@ -354,15 +406,29 @@ export function parseObjectValue(
           })())
       ) {
         if (currentKey) {
-          processFieldValue(currentKey.trim(), currentValue.trim())
+          processFieldValue(
+            currentKey.trim(),
+            currentValue.trim(),
+            fieldStart,
+            fieldEnd,
+            valueStart
+          )
         }
         currentKey = ''
         currentValue = ''
         collectingKey = true
+        fieldStart = -1
+        fieldEnd = -1
+        valueStart = -1
         continue
       }
 
       // Collect characters
+      if (i < content.length && !/\s/.test(char)) {
+        if (fieldStart === -1) fieldStart = i
+        fieldEnd = i + 1
+      }
+
       if (collectingKey) {
         currentKey += char
       } else {
@@ -373,7 +439,13 @@ export function parseObjectValue(
     // Process the last field if there's any remaining key/value
     // This handles the case where the object doesn't end with a comma
     if (currentKey && !collectingKey) {
-      processFieldValue(currentKey.trim(), currentValue.trim())
+      processFieldValue(
+        currentKey.trim(),
+        currentValue.trim(),
+        fieldStart,
+        fieldEnd,
+        valueStart
+      )
     }
   }
 
@@ -389,62 +461,34 @@ export function parseObjectValue(
  */
 export function parseArrayValue(
   value: string,
-  position?: Position
+  position?: Position,
+  origin?: ValueOrigin
 ): ArrayValue {
   const elements: Array<ArrayElement | CommentNode> = []
-  let content = value.trim().slice(1, -1).trim()
-
-  // Handle multiline arrays by normalizing whitespace
-  if (content.includes('\n')) {
-    // Remove common indentation
-    const lines = content.split(/\r?\n/)
-    const indentations = lines
-      .filter(line => line.trim().length > 0)
-      .map(line => line.match(/^(\s*)/)?.[1].length || 0)
-
-    if (indentations.length > 0) {
-      const minIndent = Math.min(...indentations)
-      content = lines
-        .map(line => {
-          if (line.trim().length === 0) return ''
-          return line.substring(Math.min(minIndent, line.length))
-        })
-        .join(' ')
-        .trim()
-    } else {
-      content = lines.join(' ').trim()
-    }
-  }
+  const content = value.trim().slice(1, -1)
+  // Character zero of `content` is the one right after the opening bracket
+  const contentOrigin = origin ? offsetToPoint(value, 1, origin) : undefined
 
   // Helper function to process a value and add it to elements
-  const processValue = (value: string) => {
+  const processValue = (value: string, start: number, end: number) => {
     if (!value.trim()) return
 
-    const trimmedValue = value.trim()
+    const elementPosition = spanPosition(
+      content,
+      start,
+      end,
+      contentOrigin,
+      position
+    )
+    const elementOrigin = contentOrigin
+      ? offsetToPoint(content, start, contentOrigin)
+      : undefined
 
-    // Check if it's a nested array or object
-    if (trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) {
-      // It's a nested array
-      elements.push({
-        type: 'Element',
-        value: parseArrayValue(trimmedValue, position),
-        position,
-      })
-    } else if (trimmedValue.startsWith('{') && trimmedValue.endsWith('}')) {
-      // It's a nested object
-      elements.push({
-        type: 'Element',
-        value: parseObjectValue(trimmedValue, position),
-        position,
-      })
-    } else {
-      // It's a regular value
-      elements.push({
-        type: 'Element',
-        value: parseValue(trimmedValue, position),
-        position,
-      })
-    }
+    elements.push({
+      type: 'Element',
+      value: parseValue(value.trim(), elementPosition, elementOrigin),
+      position: elementPosition,
+    })
   }
 
   // More robust parsing for nested structures
@@ -456,6 +500,10 @@ export function parseArrayValue(
     let inLineComment = false
     let inBlockComment = false
     let commentBuffer = ''
+    // Offsets of the element being collected, so it can carry its own position
+    let elementStart = -1
+    let elementEnd = -1
+    let commentStart = -1
 
     for (let i = 0; i <= content.length; i++) {
       const char = i < content.length ? content[i] : ',' // Add a comma at the end to process the last element
@@ -466,6 +514,7 @@ export function parseArrayValue(
       if (!inQuote && !inBlockComment && char === '/' && nextChar === '/') {
         inLineComment = true
         commentBuffer = '//'
+        commentStart = i
         i++ // Skip the next slash
         continue
       }
@@ -473,6 +522,7 @@ export function parseArrayValue(
       if (!inQuote && !inLineComment && char === '/' && nextChar === '*') {
         inBlockComment = true
         commentBuffer = '/*'
+        commentStart = i
         i++ // Skip the next asterisk
         continue
       }
@@ -483,7 +533,13 @@ export function parseArrayValue(
           type: 'Comment',
           value: commentBuffer.slice(2).trim(),
           isLineComment: true,
-          position,
+          position: spanPosition(
+            content,
+            commentStart,
+            i,
+            contentOrigin,
+            position
+          ),
         })
         inLineComment = false
         commentBuffer = ''
@@ -498,7 +554,13 @@ export function parseArrayValue(
           type: 'Comment',
           value: commentBuffer.slice(2).trim(),
           isLineComment: false,
-          position,
+          position: spanPosition(
+            content,
+            commentStart,
+            i + 2,
+            contentOrigin,
+            position
+          ),
         })
         inBlockComment = false
         commentBuffer = ''
@@ -538,7 +600,7 @@ export function parseArrayValue(
       // Handle element separator (comma or whitespace followed by a new value)
       if (
         (char === ',' && inQuote === null && inObject === 0 && inArray === 0) ||
-        (char === ' ' &&
+        ((char === ' ' || char === '\n') &&
           inQuote === null &&
           inObject === 0 &&
           inArray === 0 &&
@@ -554,19 +616,26 @@ export function parseArrayValue(
             return j < content.length && content[j] !== ','
           })())
       ) {
-        processValue(currentValue.trim())
+        processValue(currentValue.trim(), elementStart, elementEnd)
         currentValue = ''
+        elementStart = -1
+        elementEnd = -1
         continue
       }
 
       // Collect characters
+      if (i < content.length && !/\s/.test(char)) {
+        if (elementStart === -1) elementStart = i
+        elementEnd = i + 1
+      }
+
       currentValue += char
     }
 
     // Process the last element if there's any remaining value
     // This handles the case where the array doesn't end with a comma
     if (currentValue.trim()) {
-      processValue(currentValue.trim())
+      processValue(currentValue.trim(), elementStart, elementEnd)
     }
   }
 

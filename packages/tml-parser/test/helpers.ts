@@ -303,8 +303,7 @@ export function findAttribute(
  */
 export function findValueNode(block: BlockNode): ValueNode | undefined {
   return block.children.find(child => child.type === 'Value') as
-    | ValueNode
-    | undefined
+    ValueNode | undefined
 }
 
 /**

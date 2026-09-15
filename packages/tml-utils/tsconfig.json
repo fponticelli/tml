@@ -14,15 +14,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "declaration": true,
-    "declarationDir": "dist",
-    "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@typedml/parser": ["../tml-parser/src/index.ts"],
-      "@typedml/parser/*": ["../tml-parser/src/*"]
-    }
+    "types": ["vitest/globals"]
   },
-  "include": ["src"]
+  "include": ["src", "test", "*.config.ts"]
 }
