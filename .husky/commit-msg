@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Setup environment (PATH, nvm, etc.)
 . "$(dirname -- "$0")/setup-env.sh"
 
