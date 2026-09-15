@@ -36,6 +36,15 @@
     "turbo": "2.10.13",
     "typescript": "7.0.2"
   },
+  "resolutions": {
+    "**/micromatch/picomatch": "^2.3.2",
+    "ip-address": "^10.3.1",
+    "js-yaml": "^4.3.2",
+    "minimatch": "^10.2.6",
+    "qs": "^6.16.0",
+    "socks": "^2.8.10",
+    "tar": "^7.5.18"
+  },
   "engines": {
     "node": ">=24.15.0"
   }
