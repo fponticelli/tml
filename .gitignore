@@ -39,3 +39,7 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+# this project uses yarn; npm and pnpm lockfiles do not belong here
+package-lock.json
+pnpm-lock.yaml
