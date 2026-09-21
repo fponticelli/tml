@@ -30,10 +30,10 @@
     "commitlint": "21.2.2",
     "husky": "9.1.7",
     "oxlint": "1.83.0",
-    "oxlint-tsgolint": "7.0.2001",
-    "prettier": "3.9.6",
+    "oxlint-tsgolint": "7.0.2002",
+    "prettier": "3.9.8",
     "semantic-release": "25.0.9",
-    "turbo": "2.10.13",
+    "turbo": "2.11.1",
     "typescript": "7.0.2"
   },
   "resolutions": {
