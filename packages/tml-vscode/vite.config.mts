@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     minify: true,
     sourcemap: true,
     lib: {
-      entry: resolve(__dirname, 'src/extension.ts'),
+      entry: resolve(import.meta.dirname, 'src/extension.ts'),
       formats: ['cjs'],
       fileName: () => 'extension.js',
     },
@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: {
-      '@typedml/parser': resolve(__dirname, '../tml-parser/dist'),
-      '@typedml/utils': resolve(__dirname, '../tml-utils/dist'),
+      '@typedml/parser': resolve(import.meta.dirname, '../tml-parser/dist'),
+      '@typedml/utils': resolve(import.meta.dirname, '../tml-utils/dist'),
     },
   },
   watch:

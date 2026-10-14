@@ -10,3 +10,4 @@ node_modules/**
 scripts/*
 examples/*
 .turbo/*
+vite.config.mts

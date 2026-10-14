@@ -16,7 +16,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@typedml/parser': resolve(__dirname, '../tml-parser/dist'),
+      '@typedml/parser': resolve(import.meta.dirname, '../tml-parser/dist'),
     },
   },
 })
