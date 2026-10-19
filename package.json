@@ -33,7 +33,7 @@
     "oxlint-tsgolint": "7.0.2004",
     "prettier": "3.9.10",
     "semantic-release": "25.0.9",
-    "turbo": "2.11.8",
+    "turbo": "2.11.9",
     "typescript": "7.0.2"
   },
   "resolutions": {
