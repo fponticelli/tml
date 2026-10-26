@@ -20,20 +20,20 @@
     "reset": "yarn clean && yarn install"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.2.3",
-    "@commitlint/config-conventional": "21.2.3",
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
     "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/git": "11.0.1",
     "@semantic-release/github": "12.0.10",
     "@semantic-release/npm": "13.2.0",
     "@semantic-release/release-notes-generator": "14.1.1",
-    "commitlint": "21.2.3",
+    "commitlint": "21.2.4",
     "husky": "9.1.7",
-    "oxlint": "1.88.0",
-    "oxlint-tsgolint": "7.0.2004",
+    "oxlint": "1.89.0",
+    "oxlint-tsgolint": "7.0.2005",
     "prettier": "3.9.10",
     "semantic-release": "25.0.9",
-    "turbo": "2.11.8",
+    "turbo": "2.11.10",
     "typescript": "7.0.2"
   },
   "resolutions": {
